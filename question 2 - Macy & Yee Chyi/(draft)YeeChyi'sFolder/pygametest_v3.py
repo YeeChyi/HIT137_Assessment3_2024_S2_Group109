@@ -170,6 +170,7 @@ def game():
 
     score = 0
     level = 1
+    level_threshold = 500
 
     # Spawn enemies and collectibles
     def spawn_enemy():
