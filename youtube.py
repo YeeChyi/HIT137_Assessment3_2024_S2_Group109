@@ -4,71 +4,82 @@ from pygame.locals import *
 pygame.init()
 
 screen_width = 800
-screen_height = 800
+screen_height = int(screen_width * 0.8)
 
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Platformer')
+pygame.display.set_caption('Penguin')
+
+
+
+# creating a player
+class Penguin(pygame.sprite.Sprite):
+    def __init__(self, x, y, scale):
+        pygame.sprite.Sprite. __init__(self)
+        img = pygame.image.load('player.png')
+        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))                              
+        self.rect = img.get_rect()
+        self.rect.center = (x,y)
+
+player = Penguin(200,200,3)
+
+x = 200
+y = 200
+scale = 3
+
 
 #define game variables
 tile_size = 50
 
 
-# load and scale the background image
+#load background image
 bg_img = pygame.image.load('temple.jpg')
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
 
-
-def draw_grid():
-	for line in range(0, 20):
-		pygame.draw.line(screen, (255, 255, 255), (0, line * tile_size), (screen_width, line * tile_size))
-		pygame.draw.line(screen, (255, 255, 255), (line * tile_size, 0), (line * tile_size, screen_height))
-
-# creating a player
 class Player():
-    def __init__(self, x, y):
-        img = pygame.image.load('player.png')
-        self.image = pygame.transform.scale(img, (40, 80))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.vel_y = 0
-        self.jumped = False
+	def __init__(self, x, y, scale):
+		img = pygame.image.load('player.png')
+		self.image = pygame.transform.scale(img, (60, 100))
+		self.rect = self.image.get_rect()
+		self.rect.x = x
+		self.rect.y = y
+		self.vel_y = 0
+		self.jumped = False
 
-def update(self):
-        dx = 0
-        dy = 0
+	def update(self):
+		dx = 0
+		dy = 0
 
-        # get keypresses
-        key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE] and self.jumped == False:
-            self.vel_y = -15
-            self.jumped = True
-        if key[pygame.K_SPACE] == False:
-            self.jumped = False
-        if key[pygame.K_LEFT]:
-            dx -= 5
-        if key[pygame.K_RIGHT]:
-            dx += 5
-			
-# add gravity
-        self.vel_y += 1
-        if self.vel_y > 10:
-            self.vel_y = 10
-        dy += self.vel_y
+		#get keypresses
+		key = pygame.key.get_pressed()
+		if key[pygame.K_SPACE] and self.jumped == False:
+			self.vel_y = -15
+			self.jumped = True
+		if key[pygame.K_SPACE] == False:
+			self.jumped = False
+		if key[pygame.K_LEFT]:
+			dx -= 5
+		if key[pygame.K_RIGHT]:
+			dx += 5
 
-        # check for collision
 
-        # update player coordinates
-        self.rect.x += dx
-        self.rect.y += dy
+		#add gravity
+		self.vel_y += 1
+		if self.vel_y > 10:
+			self.vel_y = 10
+		dy += self.vel_y
 
-        if self.rect.bottom > screen_height:
-            self.rect.bottom = screen_height
-            dy = 0
+		#check for collision
 
-        # draw player onto screen
-        screen.blit(self.image, self.rect)
+		#update player coordinates
+		self.rect.x += dx
+		self.rect.y += dy
 
+		if self.rect.bottom > screen_height:
+			self.rect.bottom = screen_height
+			dy = 0
+
+		#draw player onto screen
+		screen.blit(self.image, self.rect)
 
 
 
@@ -78,7 +89,7 @@ class World():
 		self.tile_list = []
 
 		#load images
-		dirt_img = pygame.image.load('tank.png')
+		dirt_img = pygame.image.load('ghost.png')
 		grass_img = pygame.image.load('ghost.png')
 
 		row_count = 0
@@ -131,23 +142,33 @@ world_data = [
 [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
-player = Player(100,screen_height - 130)
+
+
+#player = Player(100, screen_height - 130)
 world = World(world_data)
 
+
+player = Penguin(200,200,3)
+player2 = Penguin(400,200,3)
+
+
+# to run the game
 run = True
 while run:
 
-	screen.blit(bg_img, (0, 0))
+	#screen.blit(bg_img, rect)
+	screen.blit(player.image, player.rect)
+	screen.blit(player2.image, player.rect)
+
 
 	world.draw()
-player.update()
-    
-draw_grid()
 
-for event in pygame.event.get():
+	player.update()
+
+	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			run = False
 
-pygame.display.update()
+	pygame.display.update()
 
 pygame.quit()
