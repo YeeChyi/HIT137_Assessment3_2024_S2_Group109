@@ -3,8 +3,8 @@ from pygame.locals import *
 
 pygame.init()
 
-screen_width = 1000
-screen_height = 1000
+screen_width = 800
+screen_height = 800
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Platformer')
@@ -14,7 +14,7 @@ tile_size = 50
 
 
 # load and scale the background image
-bg_img = pygame.image.load('night.jpg')
+bg_img = pygame.image.load('temple.jpg')
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
 
 
@@ -22,7 +22,14 @@ def draw_grid():
 	for line in range(0, 20):
 		pygame.draw.line(screen, (255, 255, 255), (0, line * tile_size), (screen_width, line * tile_size))
 		pygame.draw.line(screen, (255, 255, 255), (line * tile_size, 0), (line * tile_size, screen_height))
-		
+
+# creating a player
+    def __ inint
+
+
+
+
+
 class World():
 	def __init__(self, data):
 		self.tile_list = []
