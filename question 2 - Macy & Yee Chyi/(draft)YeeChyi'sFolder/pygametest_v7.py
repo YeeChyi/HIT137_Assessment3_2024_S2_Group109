@@ -20,7 +20,7 @@ pygame.display.set_caption("Side-Scrolling Tank Game")
 clock = pygame.time.Clock()
 
 # Load assets (replace with actual image paths)
-player_image = pygame.image.load("tank.png").convert_alpha()
+player_image = pygame.image.load("player.png").convert_alpha()
 player_image = pygame.transform.scale(player_image, (70, 70))  # Scale to fit
 enemy_image = pygame.image.load("genshin_hydroslime.webp").convert_alpha()
 enemy_image = pygame.transform.scale(enemy_image, (50, 50))  # Scale to fit
