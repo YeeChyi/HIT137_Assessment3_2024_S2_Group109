@@ -29,8 +29,8 @@ font = pygame.font.SysFont(None, 36)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((40, 60))
-        self.image.fill(GREEN)
+        self.image = pygame.image.load('tank.png').convert_alpha() # image for the player
+        self.image = pygame.transform.scale(self.image,(40,60))
         self.rect = self.image.get_rect()
         self.rect.x = 100
         self.rect.y = HEIGHT - self.rect.height
