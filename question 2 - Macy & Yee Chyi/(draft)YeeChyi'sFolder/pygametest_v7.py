@@ -53,6 +53,17 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_SPACE] and self.on_ground:
             self.vel_y = -15  # Jump strength
             self.on_ground = False
+        
+        # to keep the player within the screen
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top <= 0:
+            self.rect.top = 0
+        elif self.rect.bottom >= SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+
 
         # Gravity
         self.vel_y += 1  # Gravity
