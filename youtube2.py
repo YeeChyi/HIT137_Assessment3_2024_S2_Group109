@@ -18,16 +18,24 @@ FPS = 60
 moving_left = False
 moving_right = False 
 
-# creating character
+# to add colors
+BG = (144, 201, 120)
+def draw_bg():
+	screen.fill(BG)
+	
+
+# creating a character
 class Penguin(pygame.sprite.Sprite):
 	def __init__(self, x, y, scale, speed):
 		pygame.sprite.Sprite.__init__(self)
 		self.speed = speed
-
+		self.direction = 1
+		self.flip = False
 		img = pygame.image.load('girl1.jpg')
 		self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
 		self.rect = self.image.get_rect()
 		self.rect.center = (x, y)
+
 
 # for movements
 def move(self, moving_left, moving_right):
@@ -35,19 +43,21 @@ def move(self, moving_left, moving_right):
 	dy = 0
     
 
-if moving_left: 
-        dx = -self.speed
+if moving_left:
+			dx = -self.speed
+			self.flip = True
+			self.direction = -1
 if moving_right:
-        dy = self.speed
-		
-        self.rect.x += dx
-        self.rect.y += dy
-        
+			dx = self.speed
+			self.flip = False
+			self.direction = 1    
 
+self.rect.x += dx
+self.rect.y += dy
 
 
 def draw(self):
-		screen.blit(self.image, self.rect)
+		screen.blit(pygame.transform.flip(self.image, self.rect))
 
 
 
@@ -57,9 +67,12 @@ player = Penguin(200, 200, 3, 5)
 run = True
 while run:
 
-	clock.tick()
+	clock.tick(FPS)
+	
+	draw_bg()
 	
 	player.draw()
+	
 
 player.move(moving_left, moving_right)
 
