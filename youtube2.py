@@ -16,13 +16,18 @@ FPS = 60
 # game variables
 GRAVITY = 0.75
 
-# player moves
+# define player moves
 moving_left = False
 moving_right = False 
 shoot = False
 
+<<<<<<< HEAD
 # load bullets
 bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
+=======
+# load bullet image
+bullet_img = pygame.image.load('img/icon/ammo.jpg').convert_alpha()
+>>>>>>> 1f3be1357d124e9958d0d7420d72692f31461af0
 
 # to add colors
 BG = (144, 201, 120)
@@ -49,8 +54,6 @@ class Penguin(pygame.sprite.Sprite):
         self.jump = False
         self.in_air = True
         self.flip = False
-
-        # for movement of player
         self.animation_list = []
         self.frame_index = 0
         self.action = 0  # idle
@@ -104,7 +107,7 @@ class Penguin(pygame.sprite.Sprite):
             self.direction = 1
             
         # jump action
-        if self.jump and not self.in_air:
+        if self.jump and self.in_air == False:
             self.vel_y = -11 
             self.jump = False
             self.in_air = True
@@ -199,6 +202,7 @@ while run:
     clock.tick(FPS)
 
     draw_bg()
+    
     player.update()
     enemy.update()
     
@@ -219,6 +223,7 @@ while run:
         player.move(moving_left, moving_right)
     
     player.draw()
+    enemy.draw()
 
     for event in pygame.event.get():
         # to quit game
