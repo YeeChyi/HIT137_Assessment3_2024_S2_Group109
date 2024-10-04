@@ -34,12 +34,28 @@ class Penguin(pygame.sprite.Sprite):
         # for movement of player
         self.animation_list = []
         self.frame_index = 0
+        self.action = 0 # idle
         self.update_time = pygame.time.get_ticks()
+    
+    
+        # IDLE 
+        temp_list = []
+        img = pygame.image.load('0.png')
+        img = pygame.transform.scale(img, (70, 70))
+        temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        # RUN ANIMATION
+        temp_list = []
         for i in range(4):
             img = pygame.image.load(f'img/{self.char_type}/walking/{i}.png')
-            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-            self.animation_list.append(img)
-        self.image = self.animation_list[self.frame_index]
+            img = pygame.transform.scale(img, (70, 70))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        self.image = self.animation_list[self.action][self.frame_index]
+        
+
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -62,17 +78,23 @@ class Penguin(pygame.sprite.Sprite):
 
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
-        self.image = self.animation_list[self.frame_index]
+        self.image = self.animation_list[self.action][self.frame_index]
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
             self.update_time = pygame.time.get_ticks()
             self.frame_index += 1
             
-            if self.frame_index >= len(self.animation_list):
+            if self.frame_index >= len(self.animation_list[self.action]):
                 self.frame_index = 0
+                
+	# to check if action is different from previous one
+    def update_action(self, new_action):
+        if new_action != self.action:
+            self.action = new_action
+            self.frame_index = 0  # update settings
+            self.update_time = pygame.time.get_ticks()
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
-
 
 player = Penguin('player', 200, 200, 3, 5)
 
@@ -83,7 +105,14 @@ while run:
 
     draw_bg()
     player.update_animation()
+    
+# to check player actions to walk
+    if moving_left or moving_right:
+        player.update_action(1)  # walk
+    else:
+        player.update_action(0)  # idle
     player.move(moving_left, moving_right)
+    
     player.draw()
 
     for event in pygame.event.get():
