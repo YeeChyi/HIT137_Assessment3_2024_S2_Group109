@@ -12,23 +12,33 @@ pygame.display.set_caption('CLUB PENGUIN')
 clock = pygame.time.Clock()
 FPS = 60
 
+# game variables
+GRAVITY = 0.75
+
+
 # player moves
 moving_left = False
 moving_right = False 
 
 # to add colors
 BG = (144, 201, 120)
+RED = (255, 0, 0)
+
 def draw_bg():
     screen.fill(BG)
+    pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
     
 
 # creating a character
 class Penguin(pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
+        self.alive = True # player is alive
         self.char_type = char_type
         self.speed = speed
         self.direction = 1
+        self.vel_y = 0
+        self.jump = False
         self.flip = False
 
         # for movement of player
@@ -72,6 +82,27 @@ class Penguin(pygame.sprite.Sprite):
             dx = self.speed
             self.flip = False
             self.direction = 1
+            
+		# jump action
+        if self.jump == True:
+            self.vel_y = -11 
+            self.jump = False
+            
+		 # apply gravity
+        self.vel_y += GRAVITY
+        if self.vel_y > 10:
+            self.vel_y = 10
+        dy += self.vel_y
+
+        self.rect.x += dx
+        self.rect.y += dy
+
+
+	# check collision with floor
+    if self.rect.bottom + dy > 300:
+        dy = 300 - self.rect.bottom
+
+
 
         self.rect.x += dx
         self.rect.y += dy
@@ -107,6 +138,7 @@ while run:
     player.update_animation()
     
 # to check player actions to walk
+if player.alive:
     if moving_left or moving_right:
         player.update_action(1)  # walk
     else:
@@ -126,6 +158,8 @@ while run:
                 moving_left = True
             if event.key == pygame.K_d:
                 moving_right = True
+            if event.key == pygame.K_w and player.alive: # jump 
+                player.jump = True    
             if event.key == pygame.K_ESCAPE:
                 run = False
                 
