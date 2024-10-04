@@ -1,4 +1,5 @@
 import pygame
+import os
 
 pygame.init()
 
@@ -14,7 +15,6 @@ FPS = 60
 
 # game variables
 GRAVITY = 0.75
-
 
 # player moves
 moving_left = False
@@ -33,39 +33,35 @@ def draw_bg():
 class Penguin(pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
-        self.alive = True # player is alive
+        self.alive = True  # player is alive
         self.char_type = char_type
         self.speed = speed
         self.direction = 1
         self.vel_y = 0
         self.jump = False
+        self.in_air = True
         self.flip = False
 
         # for movement of player
         self.animation_list = []
         self.frame_index = 0
-        self.action = 0 # idle
+        self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
-    
-    
-        # IDLE 
-        temp_list = []
-        img = pygame.image.load('0.png')
-        img = pygame.transform.scale(img, (70, 70))
-        temp_list.append(img)
-        self.animation_list.append(temp_list)
 
-        # RUN ANIMATION
-        temp_list = []
-        for i in range(1, 4):
-            img = pygame.image.load(f'img/{self.char_type}/walking/{i}.png')
-            img = pygame.transform.scale(img, (70, 70))
-            temp_list.append(img)
-        self.animation_list.append(temp_list)
+        # player movements
+        animation_types = ['idle', 'walking', 'jumping']
+        for animation in animation_types:
+            # reset temporary list of images
+            temp_list = []
+            # count number of files in folder
+            num_of_frames = len(os.listdir(f'img/{self.char_type}/{animation}'))
+            for i in range(num_of_frames):
+                img = pygame.image.load(f'img/{self.char_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (70, 70))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.frame_index]
-        
-
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -93,26 +89,22 @@ class Penguin(pygame.sprite.Sprite):
             self.flip = False
             self.direction = 1
             
-		# jump action
-        if self.jump == True:
+        # jump action
+        if self.jump and not self.in_air:
             self.vel_y = -11 
             self.jump = False
+            self.in_air = True
             
-		 # apply gravity
+        # apply gravity
         self.vel_y += GRAVITY
         if self.vel_y > 10:
             self.vel_y = 10
         dy += self.vel_y
 
-        self.rect.x += dx
-        self.rect.y += dy
-
-
-	# check collision with floor
-    if self.rect.bottom + dy > 300:
-        dy = 300 - self.rect.bottom
-
-
+        # check collision with floor
+        if self.rect.bottom + dy > 300:
+            dy = 300 - self.rect.bottom
+            self.in_air = False  # check if allowed to jump
 
         self.rect.x += dx
         self.rect.y += dy
@@ -127,7 +119,7 @@ class Penguin(pygame.sprite.Sprite):
             if self.frame_index >= len(self.animation_list[self.action]):
                 self.frame_index = 0
                 
-	# to check if action is different from previous one
+    # to check if action is different from previous one
     def update_action(self, new_action):
         if new_action != self.action:
             self.action = new_action
@@ -136,6 +128,7 @@ class Penguin(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+
 
 player = Penguin('player', 200, 200, 3, 5)
 
@@ -147,13 +140,15 @@ while run:
     draw_bg()
     player.update_animation()
     
-# to check player actions to walk
-if player.alive:
-    if moving_left or moving_right:
-        player.update_action(1)  # walk
-    else:
-        player.update_action(0)  # idle
-    player.move(moving_left, moving_right)
+    # to check player actions to walk
+    if player.alive:
+        if player.in_air:
+            player.update_action(2)  # jump
+        elif moving_left or moving_right:
+            player.update_action(1)  # run
+        else:
+            player.update_action(0)  # idle
+        player.move(moving_left, moving_right)
     
     player.draw()
 
@@ -168,7 +163,7 @@ if player.alive:
                 moving_left = True
             if event.key == pygame.K_d:
                 moving_right = True
-            if event.key == pygame.K_w and player.alive: # jump 
+            if event.key == pygame.K_w and player.alive:  # jump 
                 player.jump = True    
             if event.key == pygame.K_ESCAPE:
                 run = False
