@@ -22,7 +22,7 @@ moving_right = False
 shoot = False
 
 # load bullets
-bullet_img = pygame.image.load('img/icon/ammo.jpg').convert_alpha()
+bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
 
 # to add colors
 BG = (144, 201, 120)
@@ -126,7 +126,7 @@ class Penguin(pygame.sprite.Sprite):
     def shoot(self):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
-            bullet = Bullet(self.rect.centerx + (0.6 * self.rect.size * self.direction), self.rect.centery, self.direction)
+            bullet = Bullet(self.rect.centerx + (0.6 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
 
