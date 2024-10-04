@@ -1,4 +1,5 @@
 import pygame
+import os
 
 pygame.init()
 
@@ -36,7 +37,8 @@ class Penguin(pygame.sprite.Sprite):
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
         for i in range(4):
-            img = pygame.image.load(f'img/{self.char_type}/idle/{i}.png')
+            img_path = os.path.join('C:/Users/glend/Downloads/HIT137/ass 3/HIT137_Assessment3_2024_S2_Group109/img/player/penguin', f'{i}.png')
+            img = pygame.image.load(img_path)
             img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
             self.animation_list.append(img)
         self.image = self.animation_list[self.frame_index]
