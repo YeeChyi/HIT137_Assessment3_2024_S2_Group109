@@ -47,7 +47,7 @@ class Penguin(pygame.sprite.Sprite):
 
         # RUN ANIMATION
         temp_list = []
-        for i in range(4):
+        for i in range(1, 4):
             img = pygame.image.load(f'img/{self.char_type}/walking/{i}.png')
             img = pygame.transform.scale(img, (70, 70))
             temp_list.append(img)
@@ -62,6 +62,16 @@ class Penguin(pygame.sprite.Sprite):
     def move(self, moving_left, moving_right):
         dx = 0
         dy = 0
+        
+        # to keep the player within the screen
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top <= 0:
+            self.rect.top = 0
+        elif self.rect.bottom >= SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
 
         # assign movement if moving left or right
         if moving_left:
