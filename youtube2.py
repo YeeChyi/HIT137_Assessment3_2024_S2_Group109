@@ -21,9 +21,8 @@ moving_left = False
 moving_right = False 
 shoot = False
 
-# load bullest
+# load bullets
 bullet_img = pygame.image.load('img/icon/ammo.jpg').convert_alpha()
-
 
 # to add colors
 BG = (144, 201, 120)
@@ -32,12 +31,6 @@ RED = (255, 0, 0)
 def draw_bg():
     screen.fill(BG)
     pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
-    
-
-# shooting bullets
-
-
-
 
 # creating a character
 class Penguin(pygame.sprite.Sprite):
@@ -46,10 +39,11 @@ class Penguin(pygame.sprite.Sprite):
         self.alive = True  # player is alive
         self.char_type = char_type
         self.speed = speed
-		self.ammo = ammo
+        self.ammo = ammo
         self.start_ammo = ammo
         self.shoot_cooldown = 0 
         self.health = 100
+        self.max_health = self.health
         self.direction = 1
         self.vel_y = 0
         self.jump = False
@@ -63,7 +57,7 @@ class Penguin(pygame.sprite.Sprite):
         self.update_time = pygame.time.get_ticks()
 
         # player movements - UPDATE THE WALKING
-        animation_types = ['idle', 'walking', 'jumping']
+        animation_types = ['idle', 'walking', 'jumping'] # ADD DEATH LATER
         for animation in animation_types:
             # reset temporary list of images
             temp_list = []
@@ -79,9 +73,10 @@ class Penguin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
-	def update(self):
+    def update(self):
         self.update_animation()
-		if self.shoot_cooldown > 0:
+        self.check_alive()
+        if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
 
     def move(self, moving_left, moving_right):
@@ -128,13 +123,12 @@ class Penguin(pygame.sprite.Sprite):
         self.rect.x += dx
         self.rect.y += dy
 
-	def shoot(self):
-        if self.shoot_cooldown == 0 and self.ammo>0:
+    def shoot(self):
+        if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
-        	bullet = Bullet(self.rect.centerx + (0.6 * self.rect.size[0] * self.direction), self.rect.centery, self.direction)
-			bullet_group.add(bullet)
+            bullet = Bullet(self.rect.centerx + (0.6 * self.rect.size * self.direction), self.rect.centery, self.direction)
+            bullet_group.add(bullet)
             self.ammo -= 1
-
 
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -144,7 +138,10 @@ class Penguin(pygame.sprite.Sprite):
             self.frame_index += 1
             
             if self.frame_index >= len(self.animation_list[self.action]):
-                self.frame_index = 0
+                if self.action == 3:
+                    self.frame_index = len(self.animation_list[self.action]) - 1
+                else: 
+                    self.frame_index = 0
                 
     # to check if action is different from previous one
     def update_action(self, new_action):
@@ -153,11 +150,18 @@ class Penguin(pygame.sprite.Sprite):
             self.frame_index = 0  # update settings
             self.update_time = pygame.time.get_ticks()
 
+    # life 
+    def check_alive(self):
+        if self.health <= 0:
+            self.health = 0
+            self.speed = 0
+            self.alive = False
+            self.update_action(3)
+
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 # creating bullets
-
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
@@ -167,29 +171,27 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.direction = direction
 
-
     def update(self):
         self.rect.x += (self.speed * self.direction)
         # check if bullet has gone off screen
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH -100:
+        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH - 100:
             self.kill()
 
-		# check collision with character
+        # check collision with character
         if pygame.sprite.spritecollide(player, bullet_group, False):
-			if player.alive:
-			self.kill()
- 		if pygame.sprite.spritecollide(enemy, bullet_group, False):
-			if enemy.alive:
-			self.kill()
-
+            if player.alive:
+                player.health -= 5
+                self.kill()
+        if pygame.sprite.spritecollide(enemy, bullet_group, False):
+            if enemy.alive:
+                enemy.health -= 25
+                self.kill()
 
 # create sprite groups
 bullet_group = pygame.sprite.Group()
 
-# load bullet image
-bullet_img = pygame.image.load('img/icon/ammo.jpg')
-
 player = Penguin('player', 200, 200, 3, 5, 20)
+enemy = Penguin('enemy', 400, 200, 3, 5, 20)
 
 run = True
 while run:
@@ -198,6 +200,7 @@ while run:
 
     draw_bg()
     player.update()
+    enemy.update()
     
     # update and draw groups
     bullet_group.update()
