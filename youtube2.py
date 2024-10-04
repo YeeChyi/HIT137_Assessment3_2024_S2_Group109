@@ -21,13 +21,11 @@ moving_left = False
 moving_right = False 
 shoot = False
 
-<<<<<<< HEAD
+
 # load bullets
 bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
-=======
 # load bullet image
 bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
->>>>>>> 1f3be1357d124e9958d0d7420d72692f31461af0
 
 # to add colors
 BG = (144, 201, 120)
