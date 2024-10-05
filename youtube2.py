@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 
 pygame.init()
 
@@ -15,21 +16,39 @@ FPS = 60
 
 # game variables
 GRAVITY = 0.75
+TILE_SIZE = 40
 
 # define player moves
 moving_left = False
 moving_right = False 
 shoot = False
 
+# Load bullet image
+bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
 
-# load bullets
-bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
-# load bullet image
-bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
+# pick up items
+health_box_img = pygame.image.load('img/icon/life.jpg').convert_alpha()
+ammo_box_img = pygame.image.load('img/icon/ammo_box.png').convert_alpha()
+
+item_boxes = {
+    'Health' : health_box_img,
+    'Ammo' : ammo_box_img
+}
 
 # to add colors
 BG = (144, 201, 120)
 RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255,0)
+BLACK = (0,0,0)
+
+font = pygame.font.SysFont('Futura', 30)
+
+# display info
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x,y))
+
 
 def draw_bg():
     screen.fill(BG)
@@ -57,7 +76,12 @@ class Penguin(pygame.sprite.Sprite):
         self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
 
-        # player movements - UPDATE THE WALKING
+        # for AI movements
+        self.move_counter = 0
+        self.idling = False
+        self.idling_counter = 0 
+
+        # player movements - UPDATE DEATH
         animation_types = ['idle', 'walking', 'jumping'] # ADD DEATH LATER
         for animation in animation_types:
             # reset temporary list of images
@@ -113,7 +137,7 @@ class Penguin(pygame.sprite.Sprite):
         # apply gravity
         self.vel_y += GRAVITY
         if self.vel_y > 10:
-            self.vel_y = 10
+            self.vel_y
         dy += self.vel_y
 
         # check collision with floor
@@ -131,6 +155,31 @@ class Penguin(pygame.sprite.Sprite):
             bullet_group.add(bullet)
             self.ammo -= 1
 
+# enemy movement
+    def ai(self):
+        if self.alive and player.alive:
+            if self.idling ==False and random.randint(1, 200) == 1:
+                self.update_action(0)
+                self.idling = True
+                self.idling_counter = 50
+            if self.idling == False:
+                if self.direction == 1:
+                    ai_moving_right = True
+                else:
+                    ai_moving_right = False
+                ai_moving_left = not ai_moving_right
+                self.move(ai_moving_left, ai_moving_right)
+                self.update_action(1) # walk
+                self.move_counter += 1
+            else:
+                self.idling_counter -= -1
+                if self.idling_counter <= 0:
+                    self.idling = False
+
+                if self.move_counter > TILE_SIZE:
+                    self.direction  *= -1
+                    self.move_counter *= -1
+            
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
         self.image = self.animation_list[self.action][self.frame_index]
@@ -162,20 +211,57 @@ class Penguin(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
+# creating items
+class ItemBox(pygame.sprite.Sprite):
+    def __init__(self, item_type, x, y):
+         pygame.sprite.Sprite.__init__(self)
+         self.item_type = item_type
+         self.image = item_boxes[self.item_type]
+         self.rect = self.image.get_rect()
+         self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE-self.image.get_height()))
+
+    def update(self):
+        # check if player has picked up items
+        if pygame.sprite.collide_rect(self, player):
+            # check item type
+            if self.item_type == 'Health':
+                player.health += 25
+                if player.health > player.max_health:
+                    player.health = player.max_health
+            elif self.item_type == 'Ammo':
+                player.ammo += 15
+            # delete after picking up
+            self.kill()
+
+class HealthBar():
+    def __init__(self, x,y, health, max_health):
+        self.x = x
+        self.y = y
+        self.health = health
+        self.max_health = max_health
+    
+    def draw(self, health):
+        # update with new health
+        self.health = health
+        ratio = self.health / self.max_health
+        pygame.draw.rect(screen, BLACK, (self.x-2, self.y-2, 154, 24))
+        pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
+        pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
+
 # creating bullets
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
         self.speed = 10 
-        self.image = bullet_img
+        self.image = bullet_img # USE IMAGE
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
 
     def update(self):
-        self.rect.x += (self.speed * self.direction)
+        self.rect.x += (self.direction * self.speed)
         # check if bullet has gone off screen
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH - 100:
+        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
 
         # check collision with character
@@ -183,6 +269,7 @@ class Bullet(pygame.sprite.Sprite):
             if player.alive:
                 player.health -= 5
                 self.kill()
+                
         if pygame.sprite.spritecollide(enemy, bullet_group, False):
             if enemy.alive:
                 enemy.health -= 25
@@ -190,9 +277,24 @@ class Bullet(pygame.sprite.Sprite):
 
 # create sprite groups
 bullet_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
+item_box_group = pygame.sprite.Group()
 
-player = Penguin('player', 200, 200, 3, 5, 20)
-enemy = Penguin('enemy', 400, 200, 3, 5, 20)
+# temporary - create item boxes
+item_box = ItemBox('Health', 100,260)
+item_box_group.add(item_box)
+item_box = ItemBox('Ammo', 400,260)
+item_box_group.add(item_box)
+
+
+player = Penguin('player', 200, 200, 1.65, 5, 20)
+health_bar = HealthBar(10,10,player.health, player.health)
+
+
+enemy1 = Penguin('enemy', 400, 200, 1.65, 2, 20)
+enemy2 = Penguin('enemy', 300, 200, 1.65, 2, 20)
+enemy_group.add(enemy1)
+enemy_group.add(enemy2)
 
 run = True
 while run:
@@ -200,13 +302,27 @@ while run:
     clock.tick(FPS)
 
     draw_bg()
-    
+
+    # show health
+    health_bar.draw(player.health)
+
+    # show ammo
+    draw_text('AMMO:', font, WHITE, 10, 35)
+    for x in range(player.ammo):
+        screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
+
     player.update()
-    enemy.update()
+
+    for enemy in enemy_group:
+        enemy.ai()
+        enemy.update()
+        enemy.draw()
     
     # update and draw groups
     bullet_group.update()
     bullet_group.draw(screen)
+    item_box_group.update()
+    item_box_group.draw(screen)
 
     # to check player actions 
     if player.alive:
@@ -221,7 +337,6 @@ while run:
         player.move(moving_left, moving_right)
     
     player.draw()
-    enemy.draw()
 
     for event in pygame.event.get():
         # to quit game
@@ -234,7 +349,7 @@ while run:
                 moving_left = True
             if event.key == pygame.K_d:  # move right
                 moving_right = True
-            if event.key == pygame.K_SPACE:  # to shoot
+            if event.key == pygame.K_s:  # to shoot
                 shoot = True
             if event.key == pygame.K_w and player.alive:  # jump 
                 player.jump = True    
@@ -247,7 +362,7 @@ while run:
                 moving_left = False
             if event.key == pygame.K_d:
                 moving_right = False
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_s:
                 shoot = False
 
     pygame.display.update()
