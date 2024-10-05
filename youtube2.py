@@ -55,7 +55,8 @@ def draw_bg():
     pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
 
 # creating a character
-class Penguin(pygame.sprite.Sprite):
+class Penguin(
+    pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed, ammo):
         pygame.sprite.Sprite.__init__(self)
         self.alive = True  # player is alive
