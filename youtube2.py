@@ -78,6 +78,7 @@ class Penguin(pygame.sprite.Sprite):
 
         # for AI movements
         self.move_counter = 0
+        self.vision = pygame.Rect(0,0,150,20)
         self.idling = False
         self.idling_counter = 0 
 
@@ -151,7 +152,7 @@ class Penguin(pygame.sprite.Sprite):
     def shoot(self):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
-            bullet = Bullet(self.rect.centerx + (0.6 * self.rect.width * self.direction), self.rect.centery, self.direction)
+            bullet = Bullet(self.rect.centerx + (0.75 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
 
@@ -162,23 +163,31 @@ class Penguin(pygame.sprite.Sprite):
                 self.update_action(0)
                 self.idling = True
                 self.idling_counter = 50
-            if self.idling == False:
-                if self.direction == 1:
-                    ai_moving_right = True
-                else:
-                    ai_moving_right = False
-                ai_moving_left = not ai_moving_right
-                self.move(ai_moving_left, ai_moving_right)
-                self.update_action(1) # walk
-                self.move_counter += 1
+            # check if enemy is near player
+            if self.vision.colliderect(player.rect):
+                self.update_action(0) # stop running 
+                self.shoot()
             else:
-                self.idling_counter -= -1
-                if self.idling_counter <= 0:
-                    self.idling = False
+                if self.idling == False:
+                    if self.direction == 1:
+                        ai_moving_right = True
+                    else:
+                        ai_moving_right = False
+                    ai_moving_left = not ai_moving_right
+                    self.move(ai_moving_left, ai_moving_right)
+                    self.update_action(1) # walk
+                    self.move_counter += 1
 
-                if self.move_counter > TILE_SIZE:
-                    self.direction  *= -1
-                    self.move_counter *= -1
+                    self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                    pygame.draw.rect(screen, RED, self.vision)
+
+                    if self.move_counter > TILE_SIZE:
+                        self.direction  *= -1
+                        self.move_counter *= -1
+                else:
+                    self.idling_counter -= 1
+                    if self.idling_counter <= 0:
+                        self.idling = False
             
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
