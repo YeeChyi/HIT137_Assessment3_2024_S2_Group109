@@ -83,7 +83,7 @@ class Penguin(pygame.sprite.Sprite):
         self.idling_counter = 0 
 
         # player movements - UPDATE DEATH
-        animation_types = ['idle', 'walking', 'jumping'] # ADD DEATH LATER
+        animation_types = ['idle', 'walking', 'jumping', 'death'] # ADD DEATH LATER
         for animation in animation_types:
             # reset temporary list of images
             temp_list = []
