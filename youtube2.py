@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 
 pygame.init()
 
@@ -75,6 +76,11 @@ class Penguin(pygame.sprite.Sprite):
         self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
 
+        # for AI movements
+        self.move_counter = 0
+        self.idling = False
+        self.idling_counter = 0 
+
         # player movements - UPDATE DEATH
         animation_types = ['idle', 'walking', 'jumping'] # ADD DEATH LATER
         for animation in animation_types:
@@ -148,6 +154,31 @@ class Penguin(pygame.sprite.Sprite):
             bullet = Bullet(self.rect.centerx + (0.6 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
+
+# enemy movement
+    def ai(self):
+        if self.alive and player.alive:
+            if self.idling ==False and random.randint(1, 200) == 1:
+                self.update_action(0)
+                self.idling = True
+                self.idling_counter = 50
+            if self.idling == False:
+                if self.direction == 1:
+                    ai_moving_right = True
+                else:
+                    ai_moving_right = False
+                ai_moving_left = not ai_moving_right
+                self.move(ai_moving_left, ai_moving_right)
+                self.update_action(1) # walk
+                self.move_counter += 1
+            else:
+                self.idling_counter -= -1
+                if self.idling_counter <= 0:
+                    self.idling = False
+
+                if self.move_counter > TILE_SIZE:
+                    self.direction  *= -1
+                    self.move_counter *= -1
             
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -256,15 +287,13 @@ item_box = ItemBox('Ammo', 400,260)
 item_box_group.add(item_box)
 
 
-
-
-
-player = Penguin('player', 200, 200, 3, 5, 20)
+player = Penguin('player', 200, 200, 1.65, 5, 20)
 health_bar = HealthBar(10,10,player.health, player.health)
 
-enemy = Penguin('enemy', 400, 200, 3, 5, 20)
-enemy2 = Penguin('enemy', 400, 200, 3, 5, 20)
-enemy_group.add(enemy)
+
+enemy1 = Penguin('enemy', 400, 200, 1.65, 2, 20)
+enemy2 = Penguin('enemy', 300, 200, 1.65, 2, 20)
+enemy_group.add(enemy1)
 enemy_group.add(enemy2)
 
 run = True
@@ -282,9 +311,12 @@ while run:
     for x in range(player.ammo):
         screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
 
-
     player.update()
-    enemy.update()
+
+    for enemy in enemy_group:
+        enemy.ai()
+        enemy.update()
+        enemy.draw()
     
     # update and draw groups
     bullet_group.update()
@@ -305,7 +337,6 @@ while run:
         player.move(moving_left, moving_right)
     
     player.draw()
-    enemy.draw()
 
     for event in pygame.event.get():
         # to quit game
