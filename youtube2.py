@@ -15,6 +15,7 @@ FPS = 60
 
 # game variables
 GRAVITY = 0.75
+TILE_SIZE = 40
 
 # define player moves
 moving_left = False
@@ -33,11 +34,18 @@ item_boxes = {
     'Ammo' : ammo_box_img
 }
 
-
-
 # to add colors
 BG = (144, 201, 120)
 RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+
+font = pygame.font.SysFont('Futura', 30)
+
+# display info
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x,y))
+
 
 def draw_bg():
     screen.fill(BG)
@@ -179,9 +187,18 @@ class ItemBox(pygame.sprite.Sprite):
          self.rect = self.image.get_rect()
          self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE-self.image.get_height()))
 
-
-
-
+    def update(self):
+        # check if player has picked up items
+        if pygame.sprite.collide_rect(self, player):
+            # check item type
+            if self.item_type == 'Health':
+                player.health += 25
+                if player.health > player.max_health:
+                    player.health = player.max_health
+            elif self.item_type == 'Ammo':
+                player.ammo += 15
+            # delete after picking up
+            self.kill()
 
 
 # creating bullets
@@ -217,9 +234,9 @@ enemy_group = pygame.sprite.Group()
 item_box_group = pygame.sprite.Group()
 
 # temporary - create item boxes
-item_box = ItemBox('Health', 100,300)
+item_box = ItemBox('Health', 100,260)
 item_box_group.add(item_box)
-item_box = ItemBox('Ammo', 400,300)
+item_box = ItemBox('Ammo', 400,260)
 item_box_group.add(item_box)
 
 
@@ -237,7 +254,14 @@ while run:
     clock.tick(FPS)
 
     draw_bg()
+
+    # show ammo
+    draw_text(f'AMMO:{player.ammo}', font, WHITE, 10, 35)
+    # show life
+    draw_text(f'HEALTH:{player.health}', font, WHITE, 10, 35)
     
+
+
     player.update()
     enemy.update()
     
