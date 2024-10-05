@@ -23,7 +23,7 @@ shoot = False
 
 
 # Load bullet image
-bullet_img = pygame.image.load('img/icon/bullet.jpg').convert_alpha()
+bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
 
 
 # to add colors
@@ -56,7 +56,7 @@ class Penguin(pygame.sprite.Sprite):
         self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
 
-        # player movements - UPDATE THE WALKING
+        # player movements - UPDATE DEATH
         animation_types = ['idle', 'walking', 'jumping'] # ADD DEATH LATER
         for animation in animation_types:
             # reset temporary list of images
@@ -112,7 +112,7 @@ class Penguin(pygame.sprite.Sprite):
         # apply gravity
         self.vel_y += GRAVITY
         if self.vel_y > 10:
-            self.vel_y = 10
+            self.vel_y
         dy += self.vel_y
 
         # check collision with floor
