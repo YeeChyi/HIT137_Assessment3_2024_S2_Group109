@@ -22,10 +22,9 @@ moving_right = False
 shoot = False
 
 
-# load bullets
-bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
-# load bullet image
-bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
+# Load bullet image
+bullet_img = pygame.image.load('img/icon/bullet.jpg').convert_alpha()
+
 
 # to add colors
 BG = (144, 201, 120)
@@ -130,7 +129,7 @@ class Penguin(pygame.sprite.Sprite):
             bullet = Bullet(self.rect.centerx + (0.6 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
-
+            
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
         self.image = self.animation_list[self.action][self.frame_index]
@@ -167,15 +166,15 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
         self.speed = 10 
-        self.image = bullet_img
+        self.image = bullet_img # USE IMAGE
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
 
     def update(self):
-        self.rect.x += (self.speed * self.direction)
+        self.rect.x += (self.direction * self.speed)
         # check if bullet has gone off screen
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH - 100:
+        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
 
         # check collision with character
@@ -183,6 +182,7 @@ class Bullet(pygame.sprite.Sprite):
             if player.alive:
                 player.health -= 5
                 self.kill()
+                
         if pygame.sprite.spritecollide(enemy, bullet_group, False):
             if enemy.alive:
                 enemy.health -= 25
@@ -191,25 +191,26 @@ class Bullet(pygame.sprite.Sprite):
 # create sprite groups
 bullet_group = pygame.sprite.Group()
 
+
 player = Penguin('player', 200, 200, 3, 5, 20)
 enemy = Penguin('enemy', 400, 200, 3, 5, 20)
 
 run = True
 while run:
 
-    clock.tick(FPS)
+	clock.tick(FPS)
 
-    draw_bg()
+draw_bg()
     
-    player.update()
-    enemy.update()
+player.update()
+enemy.update()
     
     # update and draw groups
-    bullet_group.update()
-    bullet_group.draw(screen)
+bullet_group.update()
+bullet_group.draw(screen)
 
     # to check player actions 
-    if player.alive:
+if player.alive:
         if shoot:
             player.shoot()
         if player.in_air:
@@ -220,10 +221,10 @@ while run:
             player.update_action(0)  # idle
         player.move(moving_left, moving_right)
     
-    player.draw()
-    enemy.draw()
+player.draw()
+enemy.draw()
 
-    for event in pygame.event.get():
+for event in pygame.event.get():
         # to quit game
         if event.type == pygame.QUIT:
             run = False
@@ -234,7 +235,7 @@ while run:
                 moving_left = True
             if event.key == pygame.K_d:  # move right
                 moving_right = True
-            if event.key == pygame.K_SPACE:  # to shoot
+            if event.key == pygame.K_s:  # to shoot
                 shoot = True
             if event.key == pygame.K_w and player.alive:  # jump 
                 player.jump = True    
@@ -247,9 +248,9 @@ while run:
                 moving_left = False
             if event.key == pygame.K_d:
                 moving_right = False
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_s:
                 shoot = False
 
-    pygame.display.update()
+pygame.display.update()
 
 pygame.quit()
