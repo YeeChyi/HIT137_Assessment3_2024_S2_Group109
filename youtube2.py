@@ -24,6 +24,17 @@ shoot = False
 # Load bullet image
 bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
 
+# pick up items
+health_box_img = pygame.image.load('img/icon/life.jpg').convert_alpha()
+ammo_box_img = pygame.image.load('img/icon/ammo_box.png').convert_alpha()
+
+item_boxes = {
+    'Health' : health_box_img,
+    'Ammo' : ammo_box_img
+}
+
+
+
 # to add colors
 BG = (144, 201, 120)
 RED = (255, 0, 0)
@@ -159,6 +170,20 @@ class Penguin(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
+# creating items
+class ItemBox(pygame.sprite.Sprite):
+    def __init__(self, item_type, x, y):
+         pygame.sprite.Sprite.__init__(self)
+         self.item_type = item_type
+         self.image = item_boxes[self.item_type]
+         self.rect = self.image.get_rect()
+         self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE-self.image.get_height()))
+
+
+
+
+
+
 # creating bullets
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
@@ -188,9 +213,23 @@ class Bullet(pygame.sprite.Sprite):
 
 # create sprite groups
 bullet_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
+item_box_group = pygame.sprite.Group()
+
+# temporary - create item boxes
+item_box = ItemBox('Health', 100,300)
+item_box_group.add(item_box)
+item_box = ItemBox('Ammo', 400,300)
+item_box_group.add(item_box)
+
+
+
+
 
 player = Penguin('player', 200, 200, 3, 5, 20)
 enemy = Penguin('enemy', 400, 200, 3, 5, 20)
+enemy2 = Penguin('enemy', 400, 200, 3, 5, 20)
+enemy_group.add(enemy)
 
 run = True
 while run:
@@ -205,6 +244,8 @@ while run:
     # update and draw groups
     bullet_group.update()
     bullet_group.draw(screen)
+    item_box_group.update()
+    item_box_group.draw(screen)
 
     # to check player actions 
     if player.alive:
