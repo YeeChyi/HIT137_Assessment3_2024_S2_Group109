@@ -21,10 +21,8 @@ moving_left = False
 moving_right = False 
 shoot = False
 
-
 # Load bullet image
 bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
-
 
 # to add colors
 BG = (144, 201, 120)
@@ -191,26 +189,25 @@ class Bullet(pygame.sprite.Sprite):
 # create sprite groups
 bullet_group = pygame.sprite.Group()
 
-
 player = Penguin('player', 200, 200, 3, 5, 20)
 enemy = Penguin('enemy', 400, 200, 3, 5, 20)
 
 run = True
 while run:
 
-	clock.tick(FPS)
+    clock.tick(FPS)
 
-draw_bg()
+    draw_bg()
     
-player.update()
-enemy.update()
+    player.update()
+    enemy.update()
     
     # update and draw groups
-bullet_group.update()
-bullet_group.draw(screen)
+    bullet_group.update()
+    bullet_group.draw(screen)
 
     # to check player actions 
-if player.alive:
+    if player.alive:
         if shoot:
             player.shoot()
         if player.in_air:
@@ -221,10 +218,10 @@ if player.alive:
             player.update_action(0)  # idle
         player.move(moving_left, moving_right)
     
-player.draw()
-enemy.draw()
+    player.draw()
+    enemy.draw()
 
-for event in pygame.event.get():
+    for event in pygame.event.get():
         # to quit game
         if event.type == pygame.QUIT:
             run = False
@@ -251,6 +248,6 @@ for event in pygame.event.get():
             if event.key == pygame.K_s:
                 shoot = False
 
-pygame.display.update()
+    pygame.display.update()
 
 pygame.quit()
