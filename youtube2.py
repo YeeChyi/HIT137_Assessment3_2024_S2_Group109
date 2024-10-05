@@ -38,6 +38,8 @@ item_boxes = {
 BG = (144, 201, 120)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255,0)
+BLACK = (0,0,0)
 
 font = pygame.font.SysFont('Futura', 30)
 
@@ -200,6 +202,20 @@ class ItemBox(pygame.sprite.Sprite):
             # delete after picking up
             self.kill()
 
+class HealthBar():
+    def __init__(self, x,y, health, max_health):
+        self.x = x
+        self.y = y
+        self.health = health
+        self.max_health = max_health
+    
+    def draw(self, health):
+        # update with new health
+        self.health = health
+        ratio = self.health / self.max_health
+        pygame.draw.rect(screen, BLACK, (self.x-2, self.y-2, 154, 24))
+        pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
+        pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
 
 # creating bullets
 class Bullet(pygame.sprite.Sprite):
@@ -244,9 +260,12 @@ item_box_group.add(item_box)
 
 
 player = Penguin('player', 200, 200, 3, 5, 20)
+health_bar = HealthBar(10,10,player.health, player.health)
+
 enemy = Penguin('enemy', 400, 200, 3, 5, 20)
 enemy2 = Penguin('enemy', 400, 200, 3, 5, 20)
 enemy_group.add(enemy)
+enemy_group.add(enemy2)
 
 run = True
 while run:
@@ -255,11 +274,13 @@ while run:
 
     draw_bg()
 
+    # show health
+    health_bar.draw(player.health)
+
     # show ammo
-    draw_text(f'AMMO:{player.ammo}', font, WHITE, 10, 35)
-    # show life
-    draw_text(f'HEALTH:{player.health}', font, WHITE, 10, 35)
-    
+    draw_text('AMMO:', font, WHITE, 10, 35)
+    for x in range(player.ammo):
+        screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
 
 
     player.update()
