@@ -23,7 +23,7 @@ shoot = False
 
 
 # Load bullet image
-bullet_img = pygame.image.load('img/icon/ammo.png').convert_alpha()
+bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
 
 
 # to add colors
