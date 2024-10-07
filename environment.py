@@ -17,17 +17,23 @@ pygame.display.set_caption('ENVIRONMENT')
 ROWS = 16
 MAX_COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-
+TILE_TYPES = 21
 scroll_left = False
 scroll_right = False
 scroll = 0
 scroll_speed = 1
 
-# load images 
+# load images for background
 mountain_img = pygame.image.load('img/background/MTN.png').convert_alpha()
 tree_img = pygame.image.load('img/background/bigtrees.png').convert_alpha()
 clouds_img = pygame.image.load('img/background/clouds.png').convert_alpha()
 sky_img = pygame.image.load('img/background/sky.png').convert_alpha()
+
+# images for tiles
+img_list =[]
+for x in range(TILE_TYPES):
+    img = pygame.image.load()
+
 
 # define colors
 BLUE = (0, 0, 255)
@@ -47,7 +53,9 @@ def draw_bg():
 # for grid
 def draw_grid():
     for c in range(MAX_COLS + 1):
-        pygame.draw.line(screen, WHITE, (c * TILE_SIZE, 0),(c*TILE_SIZE, SCREEN_HEIGHT))
+        pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0),(c*TILE_SIZE, SCREEN_HEIGHT))
+    for c in range(ROWS + 1):
+        pygame.draw.line(screen, WHITE, (0, c * TILE_SIZE),(SCREEN_WIDTH, c*TILE_SIZE))
 
 
 
@@ -55,6 +63,7 @@ run = True
 while run:
     clock.tick(FPS)
     draw_bg()
+    draw_grid()
 
     # scroll map
     if scroll_left and scroll > 0:
