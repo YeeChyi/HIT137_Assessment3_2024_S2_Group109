@@ -1,5 +1,6 @@
 import pygame
 pygame.init()
+import button
 
 clock = pygame.time.Clock()
 FPS = 60
@@ -32,7 +33,9 @@ sky_img = pygame.image.load('img/background/sky.png').convert_alpha()
 # images for tiles
 img_list =[]
 for x in range(TILE_TYPES):
-    img = pygame.image.load()
+    img = pygame.image.load(f'img/tiles/{x}.png')
+    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+    img_list.append(img)
 
 
 # define colors
@@ -57,6 +60,17 @@ def draw_grid():
     for c in range(ROWS + 1):
         pygame.draw.line(screen, WHITE, (0, c * TILE_SIZE),(SCREEN_WIDTH, c*TILE_SIZE))
 
+# create buttons
+button_list = []
+button_col = 0
+button_row = 0
+for i in range(len(img_list)):
+    tile_button = button.Button(SCREEN_WIDTH + (75 * button_col) + 50, 75 * button_row + 50, img_list[i], 1)
+    button_list.append(tile_button)
+    button_col += 1
+    if button_col == 3:
+        button_row += 1
+        button_col = 0
 
 
 run = True
@@ -64,6 +78,12 @@ while run:
     clock.tick(FPS)
     draw_bg()
     draw_grid()
+
+    # tile panel
+    pygame.draw.rect(screen, BLUE, (SCREEN_WIDTH,0,SIDE_MARGIN, SCREEN_HEIGHT))
+
+    for i in button_list:
+        i.draw(screen)
 
     # scroll map
     if scroll_left and scroll > 0:
