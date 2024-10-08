@@ -18,7 +18,8 @@ pygame.display.set_caption('ENVIRONMENT')
 ROWS = 16
 MAX_COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 9
+TILE_TYPES = 14
+current_tile = 0
 scroll_left = False
 scroll_right = False
 scroll = 0
@@ -43,6 +44,17 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 RED = (200, 25, 25)
 
+# empty tile list
+world_data = []
+for row in range(ROWS):
+    r = [-1] * MAX_COLS
+    world_data.append(r)
+
+# create a ground
+for tile in range(0, MAX_COLS):
+    world_data[ROWS-1][tile] = 0
+
+
 # drawing background
 def draw_bg():
     screen.fill(BLUE)
@@ -56,9 +68,19 @@ def draw_bg():
 # for grid
 def draw_grid():
     for c in range(MAX_COLS + 1):
-        pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0),(c*TILE_SIZE, SCREEN_HEIGHT))
+        pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0),(c*TILE_SIZE - scroll, SCREEN_HEIGHT))
     for c in range(ROWS + 1):
         pygame.draw.line(screen, WHITE, (0, c * TILE_SIZE),(SCREEN_WIDTH, c*TILE_SIZE))
+
+# drawing the environment
+def draw_world():
+    for y, row in enumerate(world_data):
+        for x, tile in enumerate(row):
+            if tile >= 0:
+                screen.blit(img_list[0], (x * TILE_SIZE-scroll, y * TILE_SIZE))
+
+
+
 
 # create buttons
 button_list = []
@@ -78,12 +100,19 @@ while run:
     clock.tick(FPS)
     draw_bg()
     draw_grid()
+    draw_world()
 
     # tile panel
     pygame.draw.rect(screen, BLUE, (SCREEN_WIDTH,0,SIDE_MARGIN, SCREEN_HEIGHT))
 
-    for i in button_list:
-        i.draw(screen)
+    # choose tile
+    button_count = 0
+    for button_count, i in enumerate (button_list):
+        if i.draw(screen):
+            current_tile = button_count
+
+    # highlight tile
+    pygame.draw.rect(screen, RED, button_list[current_tile].rect, 3)            
 
     # scroll map
     if scroll_left and scroll > 0:
