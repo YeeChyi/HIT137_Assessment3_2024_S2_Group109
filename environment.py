@@ -77,9 +77,7 @@ def draw_world():
     for y, row in enumerate(world_data):
         for x, tile in enumerate(row):
             if tile >= 0:
-                screen.blit(img_list[0], (x * TILE_SIZE-scroll, y * TILE_SIZE))
-
-
+                screen.blit(img_list[tile], (x * TILE_SIZE-scroll, y * TILE_SIZE))
 
 
 # create buttons
@@ -119,6 +117,20 @@ while run:
         scroll -= 5 * scroll_speed
     if scroll_right:
         scroll += 5 * scroll_speed
+
+# add new tiles to background  by using mouse
+    pos = pygame.mouse.get_pos()
+    x = (pos[0] + scroll) // TILE_SIZE
+    y = pos[1] // TILE_SIZE
+
+    # check for coordinates within tile area
+    if pos[0] < SCREEN_WIDTH and pos[1] < SCREEN_HEIGHT:
+        if pygame.mouse.get_pressed()[0] == 1: # to change tile view
+            if world_data[y][x] != current_tile:
+                world_data[y][x] = current_tile
+
+        if pygame.mouse.get_pressed()[2] == 1: # to erase using right click
+                world_data[y][x] = -1 
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
