@@ -27,7 +27,7 @@ shoot = False
 bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
 
 # pick up items
-health_box_img = pygame.image.load('img/icon/life.jpg').convert_alpha()
+health_box_img = pygame.image.load('img/icon/life.png').convert_alpha()
 ammo_box_img = pygame.image.load('img/icon/ammo_box.png').convert_alpha()
 
 item_boxes = {
