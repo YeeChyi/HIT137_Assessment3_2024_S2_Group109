@@ -20,13 +20,19 @@ GRAVITY = 0.75
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 14
+TILE_TYPES = 17
 level = 1
 
 # define player moves
 moving_left = False
 moving_right = False 
 shoot = False
+
+img_list = []
+for x in range(TILE_TYPES):
+    img = pygame.image.load('img/tiles/{X}.png')
+    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+    img_list.append(img)
 
 # Load bullet image
 bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
@@ -226,6 +232,32 @@ class Penguin(
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
+class World():
+    def __init__(self):
+        self.obstacle_list = []
+
+    def process_data(self, data):
+        for y, row in enumerate(data):
+            for x, tile in enumerate(row):
+                if tile >= 0:
+                    img = img_list[tile]
+                    img_rect = img.get_rect()
+                    img_rect.x = x * TILE_SIZE
+                    img_rect.x = y * TILE_SIZE
+                    tile_data = (img, img_rect)
+                    if tile>= 0 and tile <= 7:
+                        self.obstacle_list.append(tile_data)
+
+                    elif tile >= 8 and tile <= 13:
+                        pass # die
+
+                    elif tile == 15:
+                        
+
+
+
+
+
 # creating items
 class ItemBox(pygame.sprite.Sprite):
     def __init__(self, item_type, x, y):
@@ -302,14 +334,28 @@ item_box = ItemBox('Ammo', 400,260)
 item_box_group.add(item_box)
 
 
-player = Penguin('player', 200, 200, 1.65, 5, 20)
-health_bar = HealthBar(10,10,player.health, player.health)
+#player = Penguin('player', 200, 200, 1.65, 5, 20)
+#health_bar = HealthBar(10,10,player.health, player.health)
 
 
-enemy1 = Penguin('enemy', 400, 200, 1.65, 2, 20)
-enemy2 = Penguin('enemy', 300, 200, 1.65, 2, 20)
-enemy_group.add(enemy1)
-enemy_group.add(enemy2)
+#enemy1 = Penguin('enemy', 400, 200, 1.65, 2, 20)
+#enemy2 = Penguin('enemy', 300, 200, 1.65, 2, 20)
+#enemy_group.add(enemy1)
+#enemy_group.add(enemy2)
+
+# empty tile list
+world_data = []
+for row in range (ROWS):
+    r = [-1] * COLS
+    world_data.append(r)
+
+# to open the game levels
+with open(f'level{level}_data.csv', newline = ' ') as csvfile:
+    reader = csv.reader(csvfile, delimiter = ',')
+    for x, row in enumerate(reader):
+        for y, tile in enumerate(row):
+            world_data[x][y] = int(tile)
+
 
 run = True
 while run:
