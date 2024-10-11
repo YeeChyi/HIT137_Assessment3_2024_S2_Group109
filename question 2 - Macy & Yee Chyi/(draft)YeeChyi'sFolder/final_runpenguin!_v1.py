@@ -2,8 +2,6 @@ import pygame
 import os
 import random
 
-from pygame.sprite import _Group
-
 # initialise pygame
 pygame.init()
 
@@ -75,3 +73,20 @@ class Penguin(pygame.sprite.Sprite):
         self.vision = pygame.Rect(0,0,150,20)
         self.idling = False
         self.idling_counter = 0
+        
+        # player movements (images)
+        animation_types = ['idle', 'walking', 'jumping', 'death']
+        for animation in animation_types:
+            # reset temporary list of images
+            temp_list = []
+            # count number of files in folder
+            num_of_frames = len(os.listdir(f'img/{self.char_type}/{animation}'))
+            for i in range(num_of_frames):
+                img = pygame.image.load(f'img/{self.char_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (70, 70))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
+        
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
