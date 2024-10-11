@@ -30,7 +30,7 @@ shoot = False
 
 img_list = []
 for x in range(TILE_TYPES):
-    img = pygame.image.load('img/tiles/{X}.png')
+    img = pygame.image.load(f'img/tiles/{x}.png')
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
 
@@ -251,11 +251,28 @@ class World():
                     elif tile >= 8 and tile <= 13:
                         pass # die
 
-                    elif tile == 15:
-                        
+                    elif tile == 15: # create a player
+                        player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
+                        health_bar = HealthBar(10,10,player.health, player.health)
+
+                    elif tile == 14: # create enemy
+                        enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
+                        enemy_group.add(enemy)
+
+                    elif tile == 16: # create ammo box
+                        item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
+                        item_box_group.add(item_box)
 
 
+                    elif tile == 17: # create health
+                        item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
+                        item_box_group.add(item_box)
 
+        return player, health_bar
+    
+    def draw(self):
+        for tile in self.obstacle_list:
+            screen.blit(tile[0], tile[1])
 
 
 # creating items
@@ -316,32 +333,19 @@ class Bullet(pygame.sprite.Sprite):
             if player.alive:
                 player.health -= 5
                 self.kill()
-                
-        if pygame.sprite.spritecollide(enemy, bullet_group, False):
-            if enemy.alive:
-                enemy.health -= 25
-                self.kill()
+    
+        for enemy in enemy_group:
+            if pygame.sprite.spritecollide(enemy, bullet_group, False):
+                if enemy.alive:
+                    enemy.health -= 25
+                    self.kill()
 
 # create sprite groups
 bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 item_box_group = pygame.sprite.Group()
 
-# temporary - create item boxes
-item_box = ItemBox('Health', 100,260)
-item_box_group.add(item_box)
-item_box = ItemBox('Ammo', 400,260)
-item_box_group.add(item_box)
 
-
-#player = Penguin('player', 200, 200, 1.65, 5, 20)
-#health_bar = HealthBar(10,10,player.health, player.health)
-
-
-#enemy1 = Penguin('enemy', 400, 200, 1.65, 2, 20)
-#enemy2 = Penguin('enemy', 300, 200, 1.65, 2, 20)
-#enemy_group.add(enemy1)
-#enemy_group.add(enemy2)
 
 # empty tile list
 world_data = []
@@ -350,11 +354,14 @@ for row in range (ROWS):
     world_data.append(r)
 
 # to open the game levels
-with open(f'level{level}_data.csv', newline = ' ') as csvfile:
+with open(f'level{level}_data.csv', newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter = ',')
     for x, row in enumerate(reader):
         for y, tile in enumerate(row):
             world_data[x][y] = int(tile)
+
+world = World()
+player, health_bar = world.process_data(world_data)
 
 
 run = True
@@ -363,6 +370,7 @@ while run:
     clock.tick(FPS)
 
     draw_bg()
+    world.draw()
 
     # show health
     health_bar.draw(player.health)
