@@ -154,8 +154,8 @@ class Penguin(
         dy += self.vel_y
 
         # check collision with floor
-        if self.rect.bottom + dy > 300:
-            dy = 300 - self.rect.bottom
+        if self.rect.bottom + dy > 609:
+            dy = 609 - self.rect.bottom
             self.in_air = False  # check if allowed to jump
 
         self.rect.x += dx
@@ -243,36 +243,57 @@ class World():
                     img = img_list[tile]
                     img_rect = img.get_rect()
                     img_rect.x = x * TILE_SIZE
-                    img_rect.x = y * TILE_SIZE
+                    img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-                    if tile>= 0 and tile <= 7:
+                    if tile>= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
 
-                    elif tile >= 8 and tile <= 13:
+                    elif tile >= 7 and tile <= 10:
                         pass # die
 
-                    elif tile == 15: # create a player
+                    elif tile >= 11 and tile <= 12:
+                         water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
+                         water_group.add(water)
+    
+                    elif tile == 14: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
 
-                    elif tile == 14: # create enemy
+                    elif tile == 13: # create enemy
                         enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
                         enemy_group.add(enemy)
 
-                    elif tile == 16: # create ammo box
+                    elif tile == 15: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-
-                    elif tile == 17: # create health
+                    elif tile == 16: # health
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
+
+                    elif tile == 17: # new level
+                        item_box = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
+                        exit_group.add(exit)
 
         return player, health_bar
     
     def draw(self):
         for tile in self.obstacle_list:
             screen.blit(tile[0], tile[1])
+
+class Water(pygame.sprite.Sprite):
+    def __init__(self, item_type, x, y):
+         pygame.sprite.Sprite.__init__(self)
+         self.image = img
+         self.rect = self.image.get_rect()
+         self.rect.midtop = (x + TILE_SIZE//2, y + (TILE_SIZE - self.image.get_height()))
+
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, item_type, x, y):
+         pygame.sprite.Sprite.__init__(self)
+         self.image = img
+         self.rect = self.image.get_rect()
+         self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
 
 
 # creating items
@@ -282,7 +303,7 @@ class ItemBox(pygame.sprite.Sprite):
          self.item_type = item_type
          self.image = item_boxes[self.item_type]
          self.rect = self.image.get_rect()
-         self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE-self.image.get_height()))
+         self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE - self.image.get_height()))
 
     def update(self):
         # check if player has picked up items
@@ -344,7 +365,8 @@ class Bullet(pygame.sprite.Sprite):
 bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 item_box_group = pygame.sprite.Group()
-
+water_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
 
 
 # empty tile list
@@ -392,6 +414,10 @@ while run:
     bullet_group.draw(screen)
     item_box_group.update()
     item_box_group.draw(screen)
+    water_group.update()
+    water_group.draw(screen)
+    exit_group.update()
+    exit_group.draw(screen)
 
     # to check player actions 
     if player.alive:
