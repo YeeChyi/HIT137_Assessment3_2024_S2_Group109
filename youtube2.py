@@ -20,7 +20,7 @@ GRAVITY = 0.75
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 17
+TILE_TYPES = 18
 level = 1
 
 # define player moves
@@ -272,7 +272,7 @@ class World():
                         item_box_group.add(item_box)
 
                     elif tile == 17: # new level
-                        item_box = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
+                        exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
                         exit_group.add(exit)
 
         return player, health_bar
