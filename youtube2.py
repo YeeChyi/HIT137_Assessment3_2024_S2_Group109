@@ -171,8 +171,8 @@ class Penguin(
                     self.in_air = False
                     dy = tile[1].top - self.rect.bottom
             
-        if self.rect.bottom + dy > 609:
-            dy = 609 - self.rect.bottom
+        if self.rect.bottom + dy > 600:
+            dy = 600 - self.rect.bottom
             self.in_air = False  # check if allowed to jump        
 
         self.rect.x += dx
