@@ -160,7 +160,7 @@ class Penguin(
             if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
                 dx = 0
             #check collision in the y direction
-            if tile[1].colliderect(self.rect.x, self.rect.y + dx, self.width, self.height):
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
                 # check if below the ground, i.e. jumping
                 if self.vel_y < 0:
                     self.vel_y = 0
@@ -365,6 +365,10 @@ class Bullet(pygame.sprite.Sprite):
         # check if bullet has gone off screen
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
+        # check for collision with level
+        for tile in world.obstacle_list:
+            if tile[1].colliderect(self.rect):
+                self.kill()
 
         # check collision with character
         if pygame.sprite.spritecollide(player, bullet_group, False):
