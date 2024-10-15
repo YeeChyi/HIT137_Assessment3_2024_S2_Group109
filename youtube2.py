@@ -2,6 +2,7 @@ import pygame
 import os
 import random
 import csv
+import button
 
 pygame.init()
 
@@ -25,6 +26,7 @@ TILE_TYPES = 18
 scroll = 0
 bg_scroll = 0
 level = 1
+start_game = False
 
 # define player moves
 moving_left = False
@@ -32,6 +34,11 @@ moving_right = False
 shoot = False
 
 # load images
+start_img = pygame.image.load('img/start_btn.png').convert_alpha()
+exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
+restart_img = 
+
+# background
 bigtrees_img = pygame.image.load('img/background/bigtrees.png').convert_alpha()
 clouds_img = pygame.image.load('img/background/clouds.png').convert_alpha()
 mountain_img = pygame.image.load('img/background/MTN.png').convert_alpha()
@@ -79,6 +86,29 @@ def draw_bg():
         screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 50))
         screen.blit(bigtrees_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - bigtrees_img.get_height() - 5))
         screen.blit(clouds_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - clouds_img.get_height() - 70))
+
+# to reset level
+def reset_level():
+    enemy_group.empty()
+    bullet_group.empty()
+    item_box_group.empty()
+    water_group.empty()
+    exit_group.empty()
+
+# empty tile list
+data = []
+for row in range (ROWS):
+    r = [-1] * COLS
+    data.append(r)
+
+return data
+
+
+
+
+
+
+
 
 # creating a character
 class Penguin(
@@ -171,6 +201,17 @@ class Penguin(
         if self.vel_y > 10:
             self.vel_y
         dy += self.vel_y
+
+
+        # COLLISION WITH WATER
+        if pygame.sprite.spritecollide(self, water_group,False):
+            self.health = 0
+        
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.health = 0
+
+
+
 
         # check for collision
         for tile in world.obstacle_list:
@@ -415,6 +456,12 @@ class Bullet(pygame.sprite.Sprite):
                     enemy.health -= 25
                     self.kill()
 
+# buttons
+start_button = button.Button(SCREEN_WIDTH//2 - 130, SCREEN_HEIGHT//2 - 150, start_img, 1)
+exit_button = button.Button(SCREEN_WIDTH//2 - 110, SCREEN_HEIGHT//2 + 50, exit_img, 1)
+
+
+
 # create sprite groups
 bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
@@ -445,46 +492,56 @@ while run:
 
     clock.tick(FPS)
 
-    draw_bg()
-    world.draw()
+    if start_game == False:
+        # menu
+        screen.fill(BG)
+        if start_button.draw(screen):
+            start_game = True
+        if exit_button.draw(screen):
+            run = False
 
-    # show health
-    health_bar.draw(player.health)
+    else:
+        draw_bg()
+        world.draw()
 
-    # show ammo
-    draw_text('AMMO:', font, WHITE, 10, 35)
-    for x in range(player.ammo):
-        screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
+        # show health
+        health_bar.draw(player.health)
 
-    player.update()
+        # show ammo
+        draw_text('AMMO:', font, WHITE, 10, 35)
+        for x in range(player.ammo):
+            screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
 
-    for enemy in enemy_group:
-        enemy.ai()
-        enemy.update()
-        enemy.draw()
-    
-    # update and draw groups
-    bullet_group.update()
-    bullet_group.draw(screen)
-    item_box_group.update()
-    item_box_group.draw(screen)
-    water_group.update()
-    water_group.draw(screen)
-    exit_group.update()
-    exit_group.draw(screen)
+        player.update()
 
-    # to check player actions 
-    if player.alive:
-        if shoot:
-            player.shoot()
-        if player.in_air:
-            player.update_action(2)  # jump
-        elif moving_left or moving_right:
-            player.update_action(1)  # run
-        else:
-            player.update_action(0)  # idle
-        scroll = player.move(moving_left, moving_right)
-        bg_scroll -= scroll
+        for enemy in enemy_group:
+            enemy.ai()
+            enemy.update()
+            enemy.draw()
+        
+        # update and draw groups
+        bullet_group.update()
+        bullet_group.draw(screen)
+        item_box_group.update()
+        item_box_group.draw(screen)
+        water_group.update()
+        water_group.draw(screen)
+        exit_group.update()
+        exit_group.draw(screen)
+
+        # to check player actions 
+        if player.alive:
+            if shoot:
+                player.shoot()
+            if player.in_air:
+                player.update_action(2)  # jump
+            elif moving_left or moving_right:
+                player.update_action(1)  # run
+            else:
+                player.update_action(0)  # idle
+            scroll = player.move(moving_left, moving_right)
+            bg_scroll -= scroll
+
         
 
     for event in pygame.event.get():
