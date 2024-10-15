@@ -171,6 +171,7 @@ class Penguin(
                     self.in_air = False
                     dy = tile[1].top - self.rect.bottom
             
+            
         if self.rect.bottom + dy > 600:
             dy = 600 - self.rect.bottom
             self.in_air = False  # check if allowed to jump        
@@ -375,7 +376,6 @@ class Bullet(pygame.sprite.Sprite):
             if player.alive:
                 player.health -= 5
                 self.kill()
-    
         for enemy in enemy_group:
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
                 if enemy.alive:
