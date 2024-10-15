@@ -17,10 +17,13 @@ FPS = 60
 
 # game variables
 GRAVITY = 0.75
+SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
 TILE_TYPES = 18
+scroll = 0
+bg_scroll = 0
 level = 1
 
 # define player moves
@@ -28,6 +31,13 @@ moving_left = False
 moving_right = False 
 shoot = False
 
+# load images
+bigtrees_img = pygame.image.load('img/background/bigtrees.png').convert_alpha()
+clouds_img = pygame.image.load('img/background/clouds.png').convert_alpha()
+mountain_img = pygame.image.load('img/background/MTN.png').convert_alpha()
+sky_img = pygame.image.load('img/background/sky.png').convert_alpha()
+
+# store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
     img = pygame.image.load(f'img/tiles/{x}.png')
@@ -63,6 +73,12 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg():
     screen.fill(BG)
+    width = sky_img.get_width()
+    for x in range(7):
+        screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
+        screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 50))
+        screen.blit(bigtrees_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - bigtrees_img.get_height() - 5))
+        screen.blit(clouds_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - clouds_img.get_height() - 70))
 
 # creating a character
 class Penguin(
@@ -94,7 +110,7 @@ class Penguin(
         self.idling_counter = 0 
 
         # player movements - UPDATE DEATH
-        animation_types = ['idle', 'walking', 'jumping', 'death'] # ADD DEATH LATER
+        animation_types = ['idle', 'walking', 'jumping', 'death']
         for animation in animation_types:
             # reset temporary list of images
             temp_list = []
@@ -119,8 +135,10 @@ class Penguin(
             self.shoot_cooldown -= 1
 
     def move(self, moving_left, moving_right):
+        # reset movement variables
+        scroll = 0
         dx = 0
-        dy = 0
+        dy = 1    # dy is =1 so that player can move forward and backward smoothly
         
         # to keep the player within the screen
         if self.rect.left < 0:
@@ -144,7 +162,7 @@ class Penguin(
             
         # jump action
         if self.jump and self.in_air == False:
-            self.vel_y = -11 
+            self.vel_y = -11
             self.jump = False
             self.in_air = True
             
@@ -169,15 +187,20 @@ class Penguin(
                 elif self.vel_y >= 0:
                     self.vel_y = 0
                     self.in_air = False
-                    dy = tile[1].top - self.rect.bottom
-            
-            
-        if self.rect.bottom + dy > 600:
-            dy = 600 - self.rect.bottom
-            self.in_air = False  # check if allowed to jump        
+                    dy = tile[1].top - self.rect.bottom       
 
         self.rect.x += dx
         self.rect.y += dy
+        
+        # update scroll based on player position
+        if self.char_type == 'player':
+            if (self.rect.right > SCREEN_WIDTH - SCROLL_THRESH and bg_scroll < (world.level_length * TILE_SIZE) - SCREEN_WIDTH)\
+                or (self.rect.left < SCROLL_THRESH and bg_scroll > abs(dx)):
+                self.rect.x -= dx
+                scroll = -dx
+                
+        return scroll
+                
 
     def shoot(self):
         if self.shoot_cooldown == 0 and self.ammo > 0:
@@ -219,6 +242,9 @@ class Penguin(
                     if self.idling_counter <= 0:
                         self.idling = False
             
+        # scroll
+        self.rect.x += scroll
+            
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
         self.image = self.animation_list[self.action][self.frame_index]
@@ -255,6 +281,7 @@ class World():
         self.obstacle_list = []
 
     def process_data(self, data):
+        self.level_length = len(data[0])
         for y, row in enumerate(data):
             for x, tile in enumerate(row):
                 if tile >= 0:
@@ -297,6 +324,7 @@ class World():
     
     def draw(self):
         for tile in self.obstacle_list:
+            tile[1][0] += scroll
             screen.blit(tile[0], tile[1])
 
 class Water(pygame.sprite.Sprite):
@@ -312,6 +340,9 @@ class Exit(pygame.sprite.Sprite):
          self.image = img
          self.rect = self.image.get_rect()
          self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
+    
+    def update(self):
+        self.rect.x += scroll
 
 
 # creating items
@@ -324,6 +355,8 @@ class ItemBox(pygame.sprite.Sprite):
          self.rect.midtop = (x + TILE_SIZE//2, y+(TILE_SIZE - self.image.get_height()))
 
     def update(self):
+        # scroll
+        self.rect.x += scroll
         # check if player has picked up items
         if pygame.sprite.collide_rect(self, player):
             # check item type
@@ -362,7 +395,7 @@ class Bullet(pygame.sprite.Sprite):
         self.direction = direction
 
     def update(self):
-        self.rect.x += (self.direction * self.speed)
+        self.rect.x += (self.direction * self.speed) + scroll
         # check if bullet has gone off screen
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
@@ -450,9 +483,9 @@ while run:
             player.update_action(1)  # run
         else:
             player.update_action(0)  # idle
-        player.move(moving_left, moving_right)
-    
-    player.draw()
+        scroll = player.move(moving_left, moving_right)
+        bg_scroll -= scroll
+        
 
     for event in pygame.event.get():
         # to quit game
@@ -480,7 +513,7 @@ while run:
                 moving_right = False
             if event.key == pygame.K_s:
                 shoot = False
-
+    player.draw()
     pygame.display.update()
 
 pygame.quit()
