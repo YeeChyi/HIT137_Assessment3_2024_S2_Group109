@@ -63,7 +63,6 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg():
     screen.fill(BG)
-    pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
 
 # creating a character
 class Penguin(
@@ -110,6 +109,8 @@ class Penguin(
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
 
     def update(self):
         self.update_animation()
@@ -153,10 +154,26 @@ class Penguin(
             self.vel_y
         dy += self.vel_y
 
-        # check collision with floor
+        # check for collision
+        for tile in world.obstacle_list:
+            #check collision in the x direction
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+                dx = 0
+            #check collision in the y direction
+            if tile[1].colliderect(self.rect.x, self.rect.y + dx, self.width, self.height):
+                # check if below the ground, i.e. jumping
+                if self.vel_y < 0:
+                    self.vel_y = 0
+                    dy = tile[1].bottom - self.rect.top
+                #  check if above the ground, i.e. falling
+                elif self.vel_y >= 0:
+                    self.vel_y = 0
+                    self.in_air = False
+                    dy = tile[1].top - self.rect.bottom
+            
         if self.rect.bottom + dy > 609:
             dy = 609 - self.rect.bottom
-            self.in_air = False  # check if allowed to jump
+            self.in_air = False  # check if allowed to jump        
 
         self.rect.x += dx
         self.rect.y += dy
