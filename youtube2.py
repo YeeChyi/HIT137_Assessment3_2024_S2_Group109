@@ -23,6 +23,7 @@ ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
 TILE_TYPES = 18
+MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
 level = 1
@@ -36,7 +37,7 @@ shoot = False
 # load images
 start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
-restart_img = 
+restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
 
 # background
 bigtrees_img = pygame.image.load('img/background/bigtrees.png').convert_alpha()
@@ -96,19 +97,11 @@ def reset_level():
     exit_group.empty()
 
 # empty tile list
-data = []
-for row in range (ROWS):
-    r = [-1] * COLS
-    data.append(r)
-
-return data
-
-
-
-
-
-
-
+    data = []
+    for row in range (ROWS):
+        r = [-1] * COLS
+        data.append(r)
+    return data
 
 # creating a character
 class Penguin(
@@ -207,10 +200,15 @@ class Penguin(
         if pygame.sprite.spritecollide(self, water_group,False):
             self.health = 0
         
+        # COLLISION WITH EXIT
+        level_complete = False
+        if pygame.sprite.spritecollide(self, exit_group,False):
+            level_complete = True
+
+
+        # FALL OFF MAP
         if self.rect.bottom > SCREEN_HEIGHT:
             self.health = 0
-
-
 
 
         # check for collision
@@ -240,7 +238,7 @@ class Penguin(
                 self.rect.x -= dx
                 scroll = -dx
                 
-        return scroll
+        return scroll, level_complete
                 
 
     def shoot(self):
@@ -459,7 +457,7 @@ class Bullet(pygame.sprite.Sprite):
 # buttons
 start_button = button.Button(SCREEN_WIDTH//2 - 130, SCREEN_HEIGHT//2 - 150, start_img, 1)
 exit_button = button.Button(SCREEN_WIDTH//2 - 110, SCREEN_HEIGHT//2 + 50, exit_img, 1)
-
+restart_button = button.Button(SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 50, restart_img, 1)
 
 
 # create sprite groups
@@ -539,10 +537,35 @@ while run:
                 player.update_action(1)  # run
             else:
                 player.update_action(0)  # idle
-            scroll = player.move(moving_left, moving_right)
+            scroll, level_complete = player.move(moving_left, moving_right)
             bg_scroll -= scroll
+            if level_complete:
+                level += 1 
+                bg_scroll = 0
+                world_data = reset_level()
+                if level <= MAX_LEVELS:
+                    with open(f'level{level}_data.csv', newline='') as csvfile:
+                        reader = csv.reader(csvfile, delimiter = ',')
+                        for x, row in enumerate(reader):
+                            for y, tile in enumerate(row):
+                                world_data[x][y] = int(tile)
+                world = World()
+                player, health_bar = world.process_data(world_data)
 
-        
+
+        else:
+            screen_scroll = 0
+            if restart_button.draw(screen):
+                bg_scroll = 0
+                world_data = reset_level()
+                with open(f'level{level}_data.csv', newline='') as csvfile:
+                    reader = csv.reader(csvfile, delimiter = ',')
+                    for x, row in enumerate(reader):
+                        for y, tile in enumerate(row):
+                            world_data[x][y] = int(tile)
+                world = World()
+                player, health_bar = world.process_data(world_data)
+
 
     for event in pygame.event.get():
         # to quit game
