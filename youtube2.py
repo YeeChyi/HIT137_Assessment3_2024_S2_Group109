@@ -22,7 +22,7 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 16
+TILE_TYPES = 14
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
@@ -256,7 +256,7 @@ class Penguin(
 # enemy movement
     def ai(self):
         if self.alive and player.alive:
-            if self.idling ==False and random.randint(1, 200) == 1:
+            if self.idling == False and random.randint(1, 50) == 1:
                 self.update_action(0)
                 self.idling = True
                 self.idling_counter = 50
@@ -335,32 +335,31 @@ class World():
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-                    if tile>= 0 and tile <= 6:
+                    if tile >= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 7 and tile <= 10:
-                        pass # DIE?!
-
-                    elif tile == 10:
+                    elif tile >= 7 and tile <= 8:
+                    #     pass # DIE?!
+                    # elif tile == 8:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
 
-                    elif tile == 12: # create enemy
+                    elif tile == 9: # create enemy
                             enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
                             enemy_group.add(enemy)
 
-                    elif tile == 13: # create a player
+                    elif tile == 10: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
 
-                    elif tile == 14: # create ammo box
+                    elif tile == 11: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 15: # health
+                    elif tile == 12: # health
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 11: # new level
+                    elif tile == 13: # new level
                         exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
                         exit_group.add(exit)
 
@@ -386,7 +385,7 @@ class Exit(pygame.sprite.Sprite):
          pygame.sprite.Sprite.__init__(self)
          self.image = img
          self.rect = self.image.get_rect()
-         self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
+         self.rect.midtop = (x + TILE_SIZE//2, y + (TILE_SIZE - self.image.get_height()))
 
     def update(self):
         self.rect.x += scroll
@@ -462,7 +461,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in enemy_group:
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
                 if enemy.alive:
-                    enemy.health -= 25
+                    enemy.health -= 40
                     self.kill()
 
         
@@ -517,10 +516,12 @@ while run:
         # show health
         health_bar.draw(player.health)
 
+        # change the font size for the 'Ammo:' text
+        font = pygame.font.Font(None, 25)
         # show ammo
         draw_text('AMMO:', font, WHITE, 10, 35)
         for x in range(player.ammo):
-            screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
+            screen.blit(bullet_img, (90 + (x*10),40))
 
         player.update()
 
