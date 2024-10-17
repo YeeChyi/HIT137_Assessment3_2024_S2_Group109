@@ -337,8 +337,7 @@ class World():
                     tile_data = (img, img_rect)
                     if tile>= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 7 and tile <= 10:
-                        pass # DIE?!
+
 
                     elif tile >= 11 and tile <= 12:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
