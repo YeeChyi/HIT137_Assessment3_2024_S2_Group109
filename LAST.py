@@ -10,7 +10,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('RUN PENGUIN, RUN!')
+pygame.display.set_caption('CLUB PENGUIN')
 
 # framerate
 clock = pygame.time.Clock()
@@ -103,8 +103,6 @@ def reset_level():
         data.append(r)
     return data
 
-score = 0
-
 # creating a character
 class Penguin(
     pygame.sprite.Sprite):
@@ -116,7 +114,7 @@ class Penguin(
         self.ammo = ammo
         self.start_ammo = ammo
         self.shoot_cooldown = 0 
-        self.health = 1000
+        self.health = 100
         self.max_health = self.health
         self.direction = 1
         self.vel_y = 0
@@ -127,6 +125,10 @@ class Penguin(
         self.frame_index = 0
         self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
+
+def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 
         # for AI movements
         self.move_counter = 0
@@ -153,13 +155,13 @@ class Penguin(
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-    def update(self):
+def update(self):
         self.update_animation()
         self.check_alive()
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
 
-    def move(self, moving_left, moving_right):
+def move(self, moving_left, moving_right):
         # reset movement variables
         scroll = 0
         dx = 0
@@ -248,57 +250,59 @@ class Penguin(
         return scroll, level_complete
                 
 
-    def shoot(self):
+def shoot(self):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
             bullet = Bullet(self.rect.centerx + (0.75 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
 
+def move(self, moving_left, moving_right, speed=1):
+    dx = 0
+    if moving_left:
+        dx = -speed
+    if moving_right:
+        dx = speed
+    self.rect.x += dx
+
+
 # enemy movement
-    def ai(self):
-        if self.alive and player.alive:
-            if self.idling ==False and random.randint(1, 200) == 1:
-                self.update_action(0)
-                self.idling = True
-                self.idling_counter = 50
-            # check if enemy is near player
-            if self.vision.colliderect(player.rect):
-                self.update_action(0) # stop running 
-                self.shoot()
-            else:
-                if self.idling == False:
-                    if self.direction == 1:
-                        ai_moving_right = True
-                    else:
-                        ai_moving_right = False
-                    ai_moving_left = not ai_moving_right
-                    self.move(ai_moving_left, ai_moving_right)
-                    self.update_action(1) # walk
-                    self.move_counter += 1
+def ai(self):
+    if self.alive and player.alive:
+        if not self.idling and random.randint(1, 200) == 1:
+            self.update_action(0)
+            self.idling = True
+            self.idling_counter = 50
 
-                    self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
-                    pygame.draw.rect(screen, RED, self.vision)
-
-                    if self.move_counter > TILE_SIZE:
-                        self.direction  *= -1
-                        self.move_counter *= -1
+        if self.vision.colliderect(player.rect):
+            self.update_action(0)  # Stop running
+            self.shoot()
+        else:
+            if not self.idling:
+                if self.direction == 1:
+                    ai_moving_right = True
                 else:
-                    self.idling_counter -= 1
-                    if self.idling_counter <= 0:
-                        self.idling = False
-        
-        # scroll
-        self.rect.x += scroll   
-        
-    
-    def update_score():
-        global score
-        score += 100
-    
-    update_score()
+                    ai_moving_right = False
+                ai_moving_left = not ai_moving_right
 
-    
+                # Adjust the speed here
+                self.move(ai_moving_left, ai_moving_right, speed=1)  # Use a smaller speed value
+                self.update_action(1)  # Walk
+                self.move_counter += 1
+
+                self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                pygame.draw.rect(screen, RED, self.vision)
+
+                if self.move_counter > TILE_SIZE:
+                    self.direction *= -1
+                    self.move_counter = 0
+            else:
+                self.idling_counter -= 1
+                if self.idling_counter <= 0:
+                    self.idling = False
+            
+        # scroll
+        self.rect.x += scroll
             
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -473,7 +477,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in enemy_group:
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
                 if enemy.alive:
-                    enemy.health -= 1000
+                    enemy.health -= 40
                     self.kill()
 
         
@@ -507,12 +511,6 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 world = World()
 player, health_bar = world.process_data(world_data)
 
-pygame.font.init()
-font = pygame.font.SysFont(None, 30)
-
-def draw_score(screen, score):
-    score_text = font.render(f'Score: {score}', True, (255,255,255))
-    screen.blit(score_text, (10, 10))
 
 run = True
 while run:
@@ -629,9 +627,7 @@ while run:
                 moving_right = False
             if event.key == pygame.K_SPACE:
                 shoot = False
-    
-    draw_score(screen, score)
-    
+
     player.draw()
     pygame.display.update()
 
