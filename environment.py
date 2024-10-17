@@ -38,8 +38,9 @@ sky_img = pygame.image.load('img/background/sky.png').convert_alpha()
 img_list = []
 for x in range(TILE_TYPES):
     img = pygame.image.load(f'img/tiles/{x}.png').convert_alpha()
-    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+    img = pygame.transform.scale(img, (40, 40))
     img_list.append(img)
+    
 
 save_img = pygame.image.load('img/start_btn.png').convert_alpha()  # START BUTTON TO SAVE
 load_img = pygame.image.load('img/exit_btn.png').convert_alpha()  # EXIT BUTTON TO LOAD

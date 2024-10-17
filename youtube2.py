@@ -586,24 +586,24 @@ while run:
 
         # keyboard functions when pressed
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:  # move left
+            if event.key == pygame.K_LEFT:  # move left
                 moving_left = True
-            if event.key == pygame.K_d:  # move right
+            if event.key == pygame.K_RIGHT:  # move right
                 moving_right = True
-            if event.key == pygame.K_s:  # to shoot
+            if event.key == pygame.K_SPACE:  # to shoot
                 shoot = True
-            if event.key == pygame.K_w and player.alive:  # jump 
+            if event.key == pygame.K_UP and player.alive:  # jump 
                 player.jump = True    
             if event.key == pygame.K_ESCAPE:
                 run = False
                 
         # keyboard functions when not pressed
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
+            if event.key == pygame.K_LEFT:
                 moving_left = False
-            if event.key == pygame.K_d:
+            if event.key == pygame.K_RIGHT:
                 moving_right = False
-            if event.key == pygame.K_s:
+            if event.key == pygame.K_SPACE:
                 shoot = False
     player.draw()
     pygame.display.update()
