@@ -7,10 +7,10 @@ import button
 pygame.init()
 
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('CLUB PENGUIN')
+pygame.display.set_caption('RUN PENGUIN, RUN!')
 
 # framerate
 clock = pygame.time.Clock()
@@ -22,7 +22,7 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 18
+TILE_TYPES = 14
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
@@ -103,6 +103,8 @@ def reset_level():
         data.append(r)
     return data
 
+score = 0
+
 # creating a character
 class Penguin(
     pygame.sprite.Sprite):
@@ -114,7 +116,7 @@ class Penguin(
         self.ammo = ammo
         self.start_ammo = ammo
         self.shoot_cooldown = 0 
-        self.health = 100
+        self.health = 1000
         self.max_health = self.health
         self.direction = 1
         self.vel_y = 0
@@ -129,7 +131,7 @@ class Penguin(
         # for AI movements
         self.move_counter = 0
         self.vision = pygame.Rect(0,0,150,20)
-        self.idling = False
+        self.idling = True
         self.idling_counter = 0 
 
         # player movements - UPDATE DEATH
@@ -256,7 +258,7 @@ class Penguin(
 # enemy movement
     def ai(self):
         if self.alive and player.alive:
-            if self.idling ==False and random.randint(1, 200) == 1:
+            if self.idling == False and random.randint(1, 50) == 1:
                 self.update_action(0)
                 self.idling = True
                 self.idling_counter = 50
@@ -285,9 +287,18 @@ class Penguin(
                     self.idling_counter -= 1
                     if self.idling_counter <= 0:
                         self.idling = False
-            
+        
         # scroll
-        self.rect.x += scroll
+        self.rect.x += scroll   
+        
+    
+    def update_score():
+        global score
+        score += 100
+    
+    update_score()
+
+    
             
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -335,32 +346,32 @@ class World():
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-                    if tile>= 0 and tile <= 6:
+                    
+                    if tile >= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 7 and tile <= 10:
-                        pass # DIE?!
-
-                    elif tile >= 11 and tile <= 12:
+                    elif tile >= 7 and tile <= 8:
+                    #     pass # DIE?!
+                    # elif tile == 8:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
-
-                    elif tile == 13: # create enemy
+                         
+                    elif tile == 9: # create enemy
                             enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
                             enemy_group.add(enemy)
 
-                    elif tile == 14: # create a player
+                    elif tile == 10: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
 
-                    elif tile == 15: # create ammo box
+                    elif tile == 11: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 16: # health
+                    elif tile == 12: # health
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 17: # new level
+                    elif tile == 13: # new level
                         exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
                         exit_group.add(exit)
 
@@ -386,7 +397,7 @@ class Exit(pygame.sprite.Sprite):
          pygame.sprite.Sprite.__init__(self)
          self.image = img
          self.rect = self.image.get_rect()
-         self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
+         self.rect.midtop = (x + TILE_SIZE//2, y + (TILE_SIZE - self.image.get_height()))
 
     def update(self):
         self.rect.x += scroll
@@ -462,7 +473,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in enemy_group:
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
                 if enemy.alive:
-                    enemy.health -= 25
+                    enemy.health -= 1000
                     self.kill()
 
         
@@ -496,6 +507,12 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 world = World()
 player, health_bar = world.process_data(world_data)
 
+pygame.font.init()
+font = pygame.font.SysFont(None, 30)
+
+def draw_score(screen, score):
+    score_text = font.render(f'Score: {score}', True, (255,255,255))
+    screen.blit(score_text, (10, 10))
 
 run = True
 while run:
@@ -517,10 +534,12 @@ while run:
         # show health
         health_bar.draw(player.health)
 
+        # change the font size for the 'Ammo:' text
+        font = pygame.font.Font(None, 25)
         # show ammo
         draw_text('AMMO:', font, WHITE, 10, 35)
         for x in range(player.ammo):
-            screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
+            screen.blit(bullet_img, (90 + (x*10),40))
 
         player.update()
 
@@ -567,6 +586,11 @@ while run:
 
         else:
             scroll = 0
+            # display "Game Over!" on the screen
+            font = pygame.font.SysFont('Futura', 50)
+            game_over_text = font.render('Uh-oh, Game Over!', True, (255, 0, 0))
+            screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 3 - game_over_text.get_height() // 2))
+     
             if restart_button.draw(screen):
                 bg_scroll = 0
                 world_data = reset_level()
@@ -577,7 +601,6 @@ while run:
                             world_data[x][y] = int(tile)
                 world = World()
                 player, health_bar = world.process_data(world_data)
-
 
 
     for event in pygame.event.get():
@@ -606,6 +629,9 @@ while run:
                 moving_right = False
             if event.key == pygame.K_SPACE:
                 shoot = False
+    
+    draw_score(screen, score)
+    
     player.draw()
     pygame.display.update()
 
