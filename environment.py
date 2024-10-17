@@ -41,8 +41,8 @@ for x in range(TILE_TYPES):
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
 
-save_img = pygame.image.load('img/start_btn.png').convert_alpha()  # START BUTTON TO SAVE
-load_img = pygame.image.load('img/exit_btn.png').convert_alpha()  # EXIT BUTTON TO LOAD
+save_img = pygame.image.load('img/save_btn.png').convert_alpha()  # START BUTTON TO SAVE
+load_img = pygame.image.load('img/load_btn.png').convert_alpha()  # EXIT BUTTON TO LOAD
 save_img = pygame.transform.scale(save_img, (100, 50)) 
 load_img = pygame.transform.scale(load_img, (100, 50))
 
