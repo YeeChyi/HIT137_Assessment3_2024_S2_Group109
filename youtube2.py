@@ -52,7 +52,7 @@ for x in range(TILE_TYPES):
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
 
-# Load bullet image
+# bullet image
 bullet_img = pygame.image.load('img/icon/bullet.png').convert_alpha()
 
 # pick up items
@@ -196,17 +196,17 @@ class Penguin(
         dy += self.vel_y
 
 
-        # COLLISION WITH WATER
+        # COLLISION WITH WATER???
         if pygame.sprite.spritecollide(self, water_group,False):
             self.health = 0
         
-        # COLLISION WITH EXIT
+        # COLLISION WITH EXIT???
         level_complete = False
         if pygame.sprite.spritecollide(self, exit_group,False):
             level_complete = True
 
 
-        # FALL OFF MAP
+        # FALL OFF MAP???
         if self.rect.bottom > SCREEN_HEIGHT:
             self.health = 0
 
@@ -216,18 +216,23 @@ class Penguin(
             #check collision in the x direction
             if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
                 dx = 0
+            # ai has hit a wall turn around
+            if self.char_type == 'enemy':
+                self.direction *= -1
+                self.move_counter = 0
             #check collision in the y direction
             if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
                 # check if below the ground, i.e. jumping
                 if self.vel_y < 0:
                     self.vel_y = 0
                     dy = tile[1].bottom - self.rect.top
-                #  check if above the ground, i.e. falling
+                # check if above the ground, i.e. falling
                 elif self.vel_y >= 0:
                     self.vel_y = 0
                     self.in_air = False
                     dy = tile[1].top - self.rect.bottom       
 
+        # update rectangle
         self.rect.x += dx
         self.rect.y += dy
         
@@ -325,27 +330,27 @@ class World():
             for x, tile in enumerate(row):
                 if tile >= 0:
                     img = img_list[tile]
+                    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE)) #REMOVE IF NOT WORKING
                     img_rect = img.get_rect()
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
                     if tile>= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-
                     elif tile >= 7 and tile <= 10:
-                        pass # die
+                        pass # DIE?!
 
                     elif tile >= 11 and tile <= 12:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
-    
+
+                    elif tile == 13: # create enemy
+                            enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
+                            enemy_group.add(enemy)
+
                     elif tile == 14: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
-
-                    elif tile == 13: # create enemy
-                        enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
-                        enemy_group.add(enemy)
 
                     elif tile == 15: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
@@ -367,19 +372,22 @@ class World():
             screen.blit(tile[0], tile[1])
 
 class Water(pygame.sprite.Sprite):
-    def __init__(self, item_type, x, y):
+    def __init__(self, img, x, y):
          pygame.sprite.Sprite.__init__(self)
          self.image = img
          self.rect = self.image.get_rect()
          self.rect.midtop = (x + TILE_SIZE//2, y + (TILE_SIZE - self.image.get_height()))
+    
+    def update(self):
+        self.rect.x += scroll
 
 class Exit(pygame.sprite.Sprite):
-    def __init__(self, item_type, x, y):
+    def __init__(self, img, x, y):
          pygame.sprite.Sprite.__init__(self)
          self.image = img
          self.rect = self.image.get_rect()
          self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
-    
+
     def update(self):
         self.rect.x += scroll
 
@@ -409,7 +417,7 @@ class ItemBox(pygame.sprite.Sprite):
             self.kill()
 
 class HealthBar():
-    def __init__(self, x,y, health, max_health):
+    def __init__(self, x, y, health, max_health):
         self.x = x
         self.y = y
         self.health = health
@@ -431,6 +439,8 @@ class Bullet(pygame.sprite.Sprite):
         self.image = bullet_img # USE IMAGE
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
         self.direction = direction
 
     def update(self):
@@ -438,7 +448,8 @@ class Bullet(pygame.sprite.Sprite):
         # check if bullet has gone off screen
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
-        # check for collision with level
+            
+        # check for collision with level and walls
         for tile in world.obstacle_list:
             if tile[1].colliderect(self.rect):
                 self.kill()
@@ -454,6 +465,7 @@ class Bullet(pygame.sprite.Sprite):
                     enemy.health -= 25
                     self.kill()
 
+        
 # buttons
 start_button = button.Button(SCREEN_WIDTH//2 - 130, SCREEN_HEIGHT//2 - 150, start_img, 1)
 exit_button = button.Button(SCREEN_WIDTH//2 - 110, SCREEN_HEIGHT//2 + 50, exit_img, 1)
@@ -519,12 +531,12 @@ while run:
         
         # update and draw groups
         bullet_group.update()
-        bullet_group.draw(screen)
         item_box_group.update()
-        item_box_group.draw(screen)
         water_group.update()
-        water_group.draw(screen)
         exit_group.update()
+        bullet_group.draw(screen)
+        item_box_group.draw(screen)
+        water_group.draw(screen)
         exit_group.draw(screen)
 
         # to check player actions 
