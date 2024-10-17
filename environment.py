@@ -42,8 +42,8 @@ for x in range(TILE_TYPES):
     img_list.append(img)
     
 
-save_img = pygame.image.load('img/start_btn.png').convert_alpha()  # START BUTTON TO SAVE
-load_img = pygame.image.load('img/exit_btn.png').convert_alpha()  # EXIT BUTTON TO LOAD
+save_img = pygame.image.load('img/save_btn.png').convert_alpha() 
+load_img = pygame.image.load('img/load_btn.png').convert_alpha() 
 save_img = pygame.transform.scale(save_img, (100, 50)) 
 load_img = pygame.transform.scale(load_img, (100, 50))
 
@@ -75,7 +75,7 @@ def draw_text(text, font, text_col, x, y):
 def draw_bg():
     screen.fill(BLUE)
     width = sky_img.get_width()
-    for x in range(4):
+    for x in range(7):
         screen.blit(sky_img, ((x * width) - scroll * 0.5, 0))
         screen.blit(mountain_img, ((x * width) - scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 50))
         screen.blit(tree_img, ((x * width) - scroll * 0.7, SCREEN_HEIGHT - tree_img.get_height() - 5))
