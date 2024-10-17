@@ -7,7 +7,7 @@ import button
 pygame.init()
 
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
+SCREEN_HEIGHT = 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('CLUB PENGUIN')
@@ -22,7 +22,7 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 17
+TILE_TYPES = 18
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
@@ -567,11 +567,6 @@ while run:
 
         else:
             scroll = 0
-            # display "Game Over!" on the screen
-            font = pygame.font.SysFont('Futura', 50)
-            game_over_text = font.render('Uh-oh, Game Over!', True, (255, 0, 0))
-            screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 3 - game_over_text.get_height() // 2))
-     
             if restart_button.draw(screen):
                 bg_scroll = 0
                 world_data = reset_level()
@@ -582,6 +577,7 @@ while run:
                             world_data[x][y] = int(tile)
                 world = World()
                 player, health_bar = world.process_data(world_data)
+
 
 
     for event in pygame.event.get():
