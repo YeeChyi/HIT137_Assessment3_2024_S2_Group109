@@ -20,7 +20,7 @@ pygame.display.set_caption('ENVIRONMENT')
 ROWS = 16
 MAX_COLS = 150
 TILE_SIZE = SCREEN_HEIGHT // ROWS
-TILE_TYPES = 14
+TILE_TYPES = 16
 level = 0  # SAFETY CHECK
 current_tile = 0
 scroll_left = False

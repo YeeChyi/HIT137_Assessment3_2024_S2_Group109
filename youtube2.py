@@ -22,11 +22,15 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
+<<<<<<< HEAD
 TILE_TYPES = 14
+=======
+TILE_TYPES = 15
+>>>>>>> fa0bfa3bf68b2ebd40e43f9f02a7b8c7f4ca6a47
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
-level = 1
+level = 0
 start_game = False
 
 # define player moves
@@ -335,13 +339,27 @@ class World():
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
+<<<<<<< HEAD
                     if tile >= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
                     elif tile >= 7 and tile <= 8:
                     #     pass # DIE?!
                     # elif tile == 8:
+=======
+
+                    if tile>= 0 and tile <= 6:
+                        self.obstacle_list.append(tile_data)
+
+                    elif tile >= 7 and tile <= 10:
+>>>>>>> fa0bfa3bf68b2ebd40e43f9f02a7b8c7f4ca6a47
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
+                        #pass # DIE?!
+                        #elif tile == 10:
+
+                    elif tile == 11: # new level
+                        exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
+                        exit_group.add(exit)
 
                     elif tile == 9: # create enemy
                             enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
@@ -359,10 +377,14 @@ class World():
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
+<<<<<<< HEAD
                     elif tile == 13: # new level
                         exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
                         exit_group.add(exit)
 
+=======
+                    
+>>>>>>> fa0bfa3bf68b2ebd40e43f9f02a7b8c7f4ca6a47
         return player, health_bar
     
     def draw(self):
