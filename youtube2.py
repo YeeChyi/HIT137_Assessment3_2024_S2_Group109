@@ -22,7 +22,7 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 17
+TILE_TYPES = 16
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
@@ -337,30 +337,31 @@ class World():
                     tile_data = (img, img_rect)
                     if tile>= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 7 and tile <= 10:
+                    
+                    elif tile >= 7 and tile <= 9:
                         pass # DIE?!
 
-                    elif tile >= 11 and tile <= 12:
+                    elif tile == 10:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
 
-                    elif tile == 13: # create enemy
+                    elif tile == 12: # create enemy
                             enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
                             enemy_group.add(enemy)
 
-                    elif tile == 14: # create a player
+                    elif tile == 13: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
 
-                    elif tile == 15: # create ammo box
+                    elif tile == 14: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 16: # health
+                    elif tile == 15: # health
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 17: # new level
+                    elif tile == 11: # new level
                         exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
                         exit_group.add(exit)
 
