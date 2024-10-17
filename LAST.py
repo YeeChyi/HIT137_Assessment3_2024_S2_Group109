@@ -126,9 +126,13 @@ class Penguin(
         self.action = 0  # idle
         self.update_time = pygame.time.get_ticks()
 
+def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
         # for AI movements
         self.move_counter = 0
-        self.vision = pygame.Rect(0,0,150,20) # red line in front of enemy
+        self.vision = pygame.Rect(0,0,150,20)
         self.idling = False
         self.idling_counter = 0 
 
@@ -151,13 +155,13 @@ class Penguin(
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-    def update(self):
+def update(self):
         self.update_animation()
         self.check_alive()
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
 
-    def move(self, moving_left, moving_right):
+def move(self, moving_left, moving_right):
         # reset movement variables
         scroll = 0
         dx = 0
@@ -246,12 +250,21 @@ class Penguin(
         return scroll, level_complete
                 
 
-    def shoot(self):
+def shoot(self):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
             bullet = Bullet(self.rect.centerx + (0.75 * self.rect.width * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             self.ammo -= 1
+
+def move(self, moving_left, moving_right, speed=1):
+    dx = 0
+    if moving_left:
+        dx = -speed
+    if moving_right:
+        dx = speed
+    self.rect.x += dx
+
 
 # enemy movement
 def ai(self):
@@ -261,7 +274,6 @@ def ai(self):
             self.idling = True
             self.idling_counter = 50
 
-        # Check if enemy is near player
         if self.vision.colliderect(player.rect):
             self.update_action(0)  # Stop running
             self.shoot()
@@ -273,10 +285,8 @@ def ai(self):
                     ai_moving_right = False
                 ai_moving_left = not ai_moving_right
 
-                # Debugging print statements
-                print(f'Moving left: {ai_moving_left}, Moving right: {ai_moving_right}')
-
-                self.move(ai_moving_left, ai_moving_right)
+                # Adjust the speed here
+                self.move(ai_moving_left, ai_moving_right, speed=1)  # Use a smaller speed value
                 self.update_action(1)  # Walk
                 self.move_counter += 1
 
@@ -285,12 +295,12 @@ def ai(self):
 
                 if self.move_counter > TILE_SIZE:
                     self.direction *= -1
-                    self.move_counter = 0  # Reset move_counter instead of multiplying by -1
+                    self.move_counter = 0
             else:
                 self.idling_counter -= 1
                 if self.idling_counter <= 0:
                     self.idling = False
-          
+            
         # scroll
         self.rect.x += scroll
             
@@ -340,37 +350,35 @@ class World():
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-
-                    if tile>= 0 and tile <= 6:
+                    
+                    if tile >= 0 and tile <= 6:
                         self.obstacle_list.append(tile_data)
-
-                    elif tile >= 7 and tile <= 10:
+                    elif tile >= 7 and tile <= 8:
+                    #     pass # DIE?!
+                    # elif tile == 8:
                          water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                          water_group.add(water)
-                        #pass # DIE?!
-                        #elif tile == 10:
-
-                    elif tile == 11: # new level
-                        exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
-                        exit_group.add(exit)
-
-                    elif tile == 12: # create enemy
+                         
+                    elif tile == 9: # create enemy
                             enemy = Penguin('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20)
                             enemy_group.add(enemy)
 
-                    elif tile == 13: # create a player
+                    elif tile == 10: # create a player
                         player = Penguin('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20)
                         health_bar = HealthBar(10,10,player.health, player.health)
 
-                    elif tile == 14: # create ammo box
+                    elif tile == 11: # create ammo box
                         item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    elif tile == 15: # health
+                    elif tile == 12: # health
                         item_box = ItemBox('Health', x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
 
-                    
+                    elif tile == 13: # new level
+                        exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
+                        exit_group.add(exit)
+
         return player, health_bar
     
     def draw(self):
@@ -393,7 +401,7 @@ class Exit(pygame.sprite.Sprite):
          pygame.sprite.Sprite.__init__(self)
          self.image = img
          self.rect = self.image.get_rect()
-         self.rect.midtop = (x + TILE_SIZE//2, (TILE_SIZE - self.image.get_height()))
+         self.rect.midtop = (x + TILE_SIZE//2, y + (TILE_SIZE - self.image.get_height()))
 
     def update(self):
         self.rect.x += scroll
@@ -469,7 +477,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in enemy_group:
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
                 if enemy.alive:
-                    enemy.health -= 25
+                    enemy.health -= 40
                     self.kill()
 
         
@@ -524,10 +532,12 @@ while run:
         # show health
         health_bar.draw(player.health)
 
+        # change the font size for the 'Ammo:' text
+        font = pygame.font.Font(None, 25)
         # show ammo
         draw_text('AMMO:', font, WHITE, 10, 35)
         for x in range(player.ammo):
-            screen.blit(bullet_img, (90 + (x*10),40)) # change pictures of ammo
+            screen.blit(bullet_img, (90 + (x*10),40))
 
         player.update()
 
@@ -617,6 +627,7 @@ while run:
                 moving_right = False
             if event.key == pygame.K_SPACE:
                 shoot = False
+
     player.draw()
     pygame.display.update()
 
