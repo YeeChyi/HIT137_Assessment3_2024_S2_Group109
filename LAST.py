@@ -22,7 +22,7 @@ SCROLL_THRESH = 200
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPES = 15
+TILE_TYPES = 14
 MAX_LEVELS = 3
 scroll = 0
 bg_scroll = 0
@@ -254,38 +254,43 @@ class Penguin(
             self.ammo -= 1
 
 # enemy movement
-    def ai(self):
-        if self.alive and player.alive:
-            if self.idling == False and random.randint(1, 200) == 1:
-                self.update_action(0)
-                self.idling = True
-                self.idling_counter = 50
-            # check if enemy is near player
-            if self.vision.colliderect(player.rect):
-                self.update_action(0) # stop running 
-                self.shoot()
-            else:
-                if self.idling == False:
-                    if self.direction == 1:
-                        ai_moving_right = True
-                    else:
-                        ai_moving_right = False
-                    ai_moving_left = not ai_moving_right
-                    self.move(ai_moving_left, ai_moving_right)
-                    self.update_action(1) # walk
-                    self.move_counter += 1
+def ai(self):
+    if self.alive and player.alive:
+        if not self.idling and random.randint(1, 200) == 1:
+            self.update_action(0)
+            self.idling = True
+            self.idling_counter = 50
 
-                    self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
-                    pygame.draw.rect(screen, RED, self.vision)
-
-                    if self.move_counter > TILE_SIZE:
-                        self.direction  *= -1
-                        self.move_counter *= -1
+        # Check if enemy is near player
+        if self.vision.colliderect(player.rect):
+            self.update_action(0)  # Stop running
+            self.shoot()
+        else:
+            if not self.idling:
+                if self.direction == 1:
+                    ai_moving_right = True
                 else:
-                    self.idling_counter -= 1
-                    if self.idling_counter <= 0:
-                        self.idling = False
-            
+                    ai_moving_right = False
+                ai_moving_left = not ai_moving_right
+
+                # Debugging print statements
+                print(f'Moving left: {ai_moving_left}, Moving right: {ai_moving_right}')
+
+                self.move(ai_moving_left, ai_moving_right)
+                self.update_action(1)  # Walk
+                self.move_counter += 1
+
+                self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                pygame.draw.rect(screen, RED, self.vision)
+
+                if self.move_counter > TILE_SIZE:
+                    self.direction *= -1
+                    self.move_counter = 0  # Reset move_counter instead of multiplying by -1
+            else:
+                self.idling_counter -= 1
+                if self.idling_counter <= 0:
+                    self.idling = False
+          
         # scroll
         self.rect.x += scroll
             
