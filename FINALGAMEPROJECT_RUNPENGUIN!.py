@@ -112,8 +112,7 @@ def update_score(amount):
 
 
 # creating a character
-class Penguin(
-    pygame.sprite.Sprite):
+class Penguin(pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed, ammo):
         pygame.sprite.Sprite.__init__(self)
         self.alive = True  # player is alive
@@ -156,6 +155,7 @@ class Penguin(
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.original_x = x
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
@@ -164,6 +164,10 @@ class Penguin(
         self.check_alive()
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
+        
+        # reset position if enemy goes off-screen
+        # if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
+        #     self.rect.x = self.original_x
 
     def move(self, moving_left, moving_right):
         # reset movement variables
@@ -284,7 +288,7 @@ class Penguin(
                     self.move_counter += 1
 
                     self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
-                    pygame.draw.rect(screen, RED, self.vision)
+                    # pygame.draw.rect(screen, RED, self.vision)
 
                     if self.move_counter > TILE_SIZE:
                         self.direction  *= -1
@@ -293,6 +297,10 @@ class Penguin(
                     self.idling_counter -= 1
                     if self.idling_counter <= 0:
                         self.idling = False
+        
+        if abs(self.rect.x - self.original_x) > TILE_SIZE * 2:
+            self.direction *= -1
+            self.move_counter = 0
         
         # scroll
         self.rect.x += scroll   
@@ -339,7 +347,7 @@ class World():
             for x, tile in enumerate(row):
                 if tile >= 0:
                     img = img_list[tile]
-                    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE)) #REMOVE IF NOT WORKING
+                    # img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE)) #REMOVE IF NOT WORKING
                     img_rect = img.get_rect()
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
@@ -509,7 +517,12 @@ world = World()
 player, health_bar = world.process_data(world_data)
 
 pygame.font.init()
-font = pygame.font.SysFont(None, 30)
+font = pygame.font.SysFont('Agency FB', 65)
+font2 = pygame.font.SysFont('Agency FB', 20)
+welcome_text = font.render("RUN PENGUIN RUN!", True, (255, 255, 255))
+members_names = font2.render("by Group 109 - Macy Salvado, Yee Chyi Too, Siti Noor Alifah", True, (255, 255, 255))
+welcome_text_rect = welcome_text.get_rect(center=(400, 80))
+members_names_rect = members_names.get_rect(center=(400, 130))
 
 def draw_score(screen, score):
     score_text = font.render(f'Score: {score}', True, (255,255,255))
@@ -523,6 +536,8 @@ while run:
     if start_game == False:
         # menu
         screen.fill(BG)
+        screen.blit(welcome_text, welcome_text_rect)
+        screen.blit(members_names, members_names_rect)
         if start_button.draw(screen):
             start_game = True
             score = 0
