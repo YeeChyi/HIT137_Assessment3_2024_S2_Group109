@@ -4,10 +4,13 @@ import random
 import csv
 import button
 
+# initialise pygame
 pygame.init()
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
+
+score = 0
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('RUN PENGUIN, RUN!')
@@ -103,7 +106,10 @@ def reset_level():
         data.append(r)
     return data
 
-score = 0
+def update_score(amount):
+    global score
+    score += amount
+
 
 # creating a character
 class Penguin(
@@ -291,14 +297,6 @@ class Penguin(
         # scroll
         self.rect.x += scroll   
         
-    
-    def update_score():
-        global score
-        score += 100
-    
-    update_score()
-
-    
             
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -422,8 +420,10 @@ class ItemBox(pygame.sprite.Sprite):
                 player.health += 25
                 if player.health > player.max_health:
                     player.health = player.max_health
+                update_score(10)
             elif self.item_type == 'Ammo':
                 player.ammo += 15
+                update_score(5)
             # delete after picking up
             self.kill()
 
@@ -475,6 +475,7 @@ class Bullet(pygame.sprite.Sprite):
                 if enemy.alive:
                     enemy.health -= 1000
                     self.kill()
+                    update_score(100)
 
         
 # buttons
@@ -512,7 +513,7 @@ font = pygame.font.SysFont(None, 30)
 
 def draw_score(screen, score):
     score_text = font.render(f'Score: {score}', True, (255,255,255))
-    screen.blit(score_text, (10, 10))
+    screen.blit(score_text, (10, 55))
 
 run = True
 while run:
@@ -524,6 +525,7 @@ while run:
         screen.fill(BG)
         if start_button.draw(screen):
             start_game = True
+            score = 0
         if exit_button.draw(screen):
             run = False
 
@@ -534,6 +536,10 @@ while run:
         # show health
         health_bar.draw(player.health)
 
+        draw_score(screen, score)
+        
+        player.draw()
+        
         # change the font size for the 'Ammo:' text
         font = pygame.font.Font(None, 25)
         # show ammo
@@ -582,6 +588,7 @@ while run:
                                 world_data[x][y] = int(tile)
                 world = World()
                 player, health_bar = world.process_data(world_data)
+                update_score(1000)
 
 
         else:
@@ -601,6 +608,7 @@ while run:
                             world_data[x][y] = int(tile)
                 world = World()
                 player, health_bar = world.process_data(world_data)
+                score = 0
 
 
     for event in pygame.event.get():
@@ -629,10 +637,10 @@ while run:
                 moving_right = False
             if event.key == pygame.K_SPACE:
                 shoot = False
+     
+     
     
-    draw_score(screen, score)
-    
-    player.draw()
+    # player.draw()
     pygame.display.update()
 
 pygame.quit()
